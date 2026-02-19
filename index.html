@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pkgprobe.io — Windows Installer Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --orange: #f97316;
+      --orange-dim: #c2560f;
+      --blue: #3b82f6;
+      --blue-bright: #60a5fa;
+      --white: #f8fafc;
+      --gray: #94a3b8;
+      --dark: #080a0e;
+      --dark-2: #0f1319;
+      --dark-3: #161c26;
+      --dark-4: #1e2733;
+      --border: rgba(255,255,255,0.07);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--dark);
+      color: var(--white);
+      font-family: 'Syne', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── GRID BG ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4rem;
+      height: 64px;
+      background: rgba(8,10,14,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: -0.01em;
+      text-decoration: none;
+    }
+    .nav-logo .pkg { color: var(--white); }
+    .nav-logo .probe { color: var(--orange); }
+    .nav-logo .io { color: var(--blue-bright); font-size: 0.9rem; }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: var(--gray);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--white); }
+
+    .nav-cta {
+      background: var(--orange);
+      color: #000 !important;
+      padding: 0.45rem 1.1rem;
+      border-radius: 6px;
+      font-weight: 700 !important;
+      letter-spacing: 0.04em !important;
+      transition: background 0.2s !important;
+    }
+    .nav-cta:hover { background: #fb923c !important; color: #000 !important; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 2rem 4rem;
+      overflow: hidden;
+    }
+
+    /* glow orbs */
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(ellipse, rgba(249,115,22,0.12) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(249,115,22,0.1);
+      border: 1px solid rgba(249,115,22,0.3);
+      color: var(--orange);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.35rem 1rem;
+      border-radius: 100px;
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.6s ease both;
+    }
+    .hero-badge::before { content: '▶'; font-size: 0.6rem; }
+
+    .hero-logo-img {
+      width: 140px;
+      height: 140px;
+      object-fit: contain;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.6s 0.1s ease both;
+      filter: drop-shadow(0 0 32px rgba(249,115,22,0.3));
+    }
+
+    h1 {
+      font-size: clamp(3rem, 7vw, 6rem);
+      font-weight: 800;
+      line-height: 1.0;
+      letter-spacing: -0.03em;
+      animation: fadeUp 0.6s 0.2s ease both;
+      max-width: 900px;
+    }
+    h1 .accent-orange { color: var(--orange); }
+    h1 .accent-blue { color: var(--blue-bright); }
+
+    .hero-sub {
+      margin-top: 1.5rem;
+      font-size: 1.15rem;
+      color: var(--gray);
+      max-width: 560px;
+      line-height: 1.7;
+      font-weight: 400;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp 0.6s 0.4s ease both;
+    }
+
+    .btn-primary {
+      background: var(--orange);
+      color: #000;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 0.8rem 2rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover { background: #fb923c; transform: translateY(-2px); }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--white);
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 0.8rem 2rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.3); transform: translateY(-2px); }
+
+    /* ── TERMINAL DEMO ── */
+    .terminal-wrap {
+      margin-top: 4rem;
+      width: 100%;
+      max-width: 680px;
+      animation: fadeUp 0.7s 0.5s ease both;
+    }
+
+    .terminal {
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      text-align: left;
+      box-shadow: 0 32px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03);
+    }
+
+    .terminal-bar {
+      background: var(--dark-3);
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #22c55e; }
+    .term-title { margin-left: auto; margin-right: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--gray); }
+
+    .terminal-body {
+      padding: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.8;
+    }
+    .t-prompt { color: var(--blue-bright); }
+    .t-cmd { color: var(--white); }
+    .t-key { color: var(--orange); }
+    .t-val { color: #86efac; }
+    .t-comment { color: var(--gray); }
+    .t-sep { color: var(--border); }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      padding: 3rem 2rem;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--dark-2);
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 0 3.5rem;
+      border-right: 1px solid var(--border);
+    }
+    .stat-item:last-child { border-right: none; }
+
+    .stat-num {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--orange);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.78rem;
+      color: var(--gray);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 0.4rem;
+      font-weight: 600;
+    }
+
+    /* ── FEATURES ── */
+    .section {
+      position: relative;
+      z-index: 1;
+      padding: 6rem 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--orange);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      max-width: 600px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5px;
+      margin-top: 4rem;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .feature-card {
+      background: var(--dark-2);
+      padding: 2.5rem 2rem;
+      transition: background 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--orange), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .feature-card:hover { background: var(--dark-3); }
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon {
+      font-size: 1.8rem;
+      margin-bottom: 1.25rem;
+      display: block;
+    }
+    .feature-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      color: var(--white);
+    }
+    .feature-desc {
+      font-size: 0.875rem;
+      color: var(--gray);
+      line-height: 1.65;
+      font-weight: 400;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .how-section {
+      position: relative;
+      z-index: 1;
+      background: var(--dark-2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 6rem 2rem;
+    }
+    .how-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      margin-top: 4rem;
+      position: relative;
+    }
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 28px;
+      left: calc(12.5% + 28px);
+      right: calc(12.5% + 28px);
+      height: 1px;
+      background: linear-gradient(90deg, var(--orange), var(--blue));
+      opacity: 0.4;
+    }
+
+    .step {
+      text-align: center;
+    }
+    .step-num {
+      width: 56px; height: 56px;
+      background: var(--dark-4);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--orange);
+      position: relative;
+      z-index: 1;
+    }
+    .step-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+    .step-desc {
+      font-size: 0.825rem;
+      color: var(--gray);
+      line-height: 1.6;
+      font-weight: 400;
+    }
+
+    /* ── USE CASES ── */
+    .usecases-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 4rem;
+    }
+
+    .usecase-card {
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      transition: border-color 0.2s;
+    }
+    .usecase-card:hover { border-color: rgba(249,115,22,0.35); }
+
+    .usecase-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--blue-bright);
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.2);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .usecase-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+    .usecase-desc {
+      font-size: 0.875rem;
+      color: var(--gray);
+      line-height: 1.65;
+      font-weight: 400;
+    }
+
+    /* ── INSTALL ── */
+    .install-section {
+      position: relative;
+      z-index: 1;
+      background: var(--dark-2);
+      border-top: 1px solid var(--border);
+      padding: 6rem 2rem;
+    }
+    .install-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+
+    .install-code {
+      background: var(--dark);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .code-tab-bar {
+      background: var(--dark-3);
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .code-tab {
+      padding: 0.6rem 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--gray);
+      cursor: pointer;
+      border-right: 1px solid var(--border);
+      transition: color 0.2s, background 0.2s;
+    }
+    .code-tab.active { color: var(--orange); background: var(--dark-2); }
+    .code-body {
+      padding: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.9;
+    }
+
+    /* ── CTA ── */
+    .cta-section {
+      position: relative;
+      z-index: 1;
+      padding: 8rem 2rem;
+      text-align: center;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 400px;
+      background: radial-gradient(ellipse, rgba(59,130,246,0.1) 0%, transparent 65%);
+      pointer-events: none;
+    }
+    .cta-section h2 {
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+    }
+    .cta-section p {
+      margin-top: 1.25rem;
+      color: var(--gray);
+      font-size: 1.05rem;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.7;
+      font-weight: 400;
+    }
+    .cta-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2.5rem;
+      flex-wrap: wrap;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--dark-2);
+    }
+    .footer-logo { font-weight: 800; font-size: 1rem; }
+    .footer-logo .pkg { color: var(--white); }
+    .footer-logo .probe { color: var(--orange); }
+    .footer-logo .io { color: var(--blue-bright); }
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+    .footer-links a {
+      color: var(--gray);
+      text-decoration: none;
+      font-size: 0.82rem;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--white); }
+    .footer-copy { font-size: 0.78rem; color: var(--gray); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      nav { padding: 0 1.5rem; }
+      .nav-links { display: none; }
+      .features-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr 1fr; }
+      .steps::before { display: none; }
+      .usecases-grid { grid-template-columns: 1fr; }
+      .install-inner { grid-template-columns: 1fr; gap: 3rem; }
+      .stats-bar { flex-wrap: wrap; gap: 2rem; }
+      .stat-item { border-right: none; }
+      footer { flex-direction: column; gap: 1.5rem; text-align: center; padding: 2rem; }
+      .footer-links { flex-wrap: wrap; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <span class="pkg">pkg</span><span class="probe">probe</span><span class="io">.io</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#usecases">Use Cases</a></li>
+    <li><a href="#install">Install</a></li>
+    <li><a href="https://github.com/tijan/pkgprobe" target="_blank" class="nav-cta">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">v0.1.0 — Now on PyPI</div>
+  <img src="1771491669940_image.png" alt="pkgprobe logo" class="hero-logo-img" />
+  <h1>
+    X-Ray Vision for<br />
+    <span class="accent-orange">Windows</span> <span class="accent-blue">Installers</span>
+  </h1>
+  <p class="hero-sub">
+    Analyze MSI, EXE, and MSIX packages before deployment.
+    Extract metadata, detect registry changes, flag vulnerabilities — in seconds.
+  </p>
+  <div class="hero-actions">
+    <a href="#install" class="btn-primary">⚡ Get Started Free</a>
+    <a href="https://github.com/tijan/pkgprobe" target="_blank" class="btn-secondary">★ Star on GitHub</a>
+  </div>
+
+  <!-- Terminal -->
+  <div class="terminal-wrap">
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="dot dot-red"></div>
+        <div class="dot dot-yellow"></div>
+        <div class="dot dot-green"></div>
+        <span class="term-title">pkgprobe — powershell</span>
+      </div>
+      <div class="terminal-body">
+        <div><span class="t-prompt">PS C:\&gt;</span> <span class="t-cmd">pkgprobe analyze ChromeSetup.exe</span></div>
+        <div>&nbsp;</div>
+        <div><span class="t-comment">  ✦ pkgprobe v0.1.0 — Windows Installer Analysis</span></div>
+        <div>&nbsp;</div>
+        <div><span class="t-key">  publisher    </span><span class="t-val">Google LLC</span></div>
+        <div><span class="t-key">  version      </span><span class="t-val">121.0.6167.85</span></div>
+        <div><span class="t-key">  signature    </span><span class="t-val">✓ Valid (SHA-256)</span></div>
+        <div><span class="t-key">  install_dir  </span><span class="t-val">%ProgramFiles%\Google\Chrome</span></div>
+        <div><span class="t-key">  reg_keys     </span><span class="t-val">42 keys written</span></div>
+        <div><span class="t-key">  services     </span><span class="t-val">GoogleUpdater (auto-start)</span></div>
+        <div><span class="t-key">  network      </span><span class="t-val">update.googleapis.com</span></div>
+        <div><span class="t-key">  cve_matches  </span><span class="t-val">0 known vulnerabilities</span></div>
+        <div>&nbsp;</div>
+        <div><span class="t-comment">  ✓ Analysis complete in 1.2s</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-num">10K+</div>
+    <div class="stat-label">Packages Analyzed</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">MSI / EXE / MSIX</div>
+    <div class="stat-label">Formats Supported</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">&lt; 2s</div>
+    <div class="stat-label">Average Scan Time</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">Open Source</div>
+    <div class="stat-label">Community-Powered</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-label">// capabilities</div>
+  <h2 class="section-title">Everything you need to know before you deploy.</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-icon">🔍</span>
+      <div class="feature-title">Deep Metadata Extraction</div>
+      <div class="feature-desc">Pull publisher, version, architecture, digital signature status, and file hashes from any installer format without running it.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🗂️</span>
+      <div class="feature-title">Registry Impact Analysis</div>
+      <div class="feature-desc">Preview every registry key an installer will write — before a single endpoint is touched. Great for audit trails and change control.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🛡️</span>
+      <div class="feature-title">Vulnerability Detection</div>
+      <div class="feature-desc">Cross-reference package metadata against known CVE databases to catch vulnerable software before it reaches your fleet.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">📡</span>
+      <div class="feature-title">Network Telemetry Scan</div>
+      <div class="feature-desc">Identify hard-coded URLs, update endpoints, and telemetry hosts embedded in the installer — know what your software calls home to.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">⚙️</span>
+      <div class="feature-title">Silent Install Detection</div>
+      <div class="feature-desc">Automatically extract silent install switches for SCCM, Intune, and other deployment tools. Build deployment commands without guesswork.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">📊</span>
+      <div class="feature-title">Community Data Moat</div>
+      <div class="feature-desc">Every analysis contributes to a growing shared dataset. The more the community uses pkgprobe, the smarter every scan gets.</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="how-inner">
+    <div class="section-label">// workflow</div>
+    <h2 class="section-title">Analyze in four steps.</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Point at a package</div>
+        <div class="step-desc">Pass a local file path, UNC path, or URL to any MSI, EXE, or MSIX installer.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">pkgprobe analyzes</div>
+        <div class="step-desc">The engine extracts headers, tables, PE metadata, and embedded scripts — no sandbox required.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Review the report</div>
+        <div class="step-desc">Get a structured JSON or human-readable report with every detail you need for safe deployment.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-title">Deploy with confidence</div>
+        <div class="step-desc">Push to SCCM, Intune, or your deployment pipeline — fully informed, zero surprises.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<section class="section" id="usecases">
+  <div class="section-label">// use cases</div>
+  <h2 class="section-title">Built for the people who actually manage endpoints.</h2>
+  <div class="usecases-grid">
+    <div class="usecase-card">
+      <span class="usecase-tag">IT / SysAdmin</span>
+      <div class="usecase-title">Streamline Software Deployment</div>
+      <div class="usecase-desc">Stop digging through vendor docs for silent install switches. pkgprobe surfaces deployment parameters automatically, cutting packaging time from hours to seconds.</div>
+    </div>
+    <div class="usecase-card">
+      <span class="usecase-tag">Security Ops</span>
+      <div class="usecase-title">Pre-Deployment Risk Assessment</div>
+      <div class="usecase-desc">Scan every new package against CVE databases and verify code signatures before approving software for your fleet. Catch issues before they become incidents.</div>
+    </div>
+    <div class="usecase-card">
+      <span class="usecase-tag">Vulnerability Mgmt</span>
+      <div class="usecase-title">Audit Software Inventory</div>
+      <div class="usecase-desc">Identify outdated or vulnerable installers sitting in your software repository. Build a clean, verified library of approved packages across your environment.</div>
+    </div>
+    <div class="usecase-card">
+      <span class="usecase-tag">Dev / DevOps</span>
+      <div class="usecase-title">CI/CD Pipeline Integration</div>
+      <div class="usecase-desc">Wire pkgprobe into your build pipelines to automatically validate installer artifacts before they reach staging or production environments.</div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTALL -->
+<section class="install-section" id="install">
+  <div class="install-inner">
+    <div>
+      <div class="section-label">// quickstart</div>
+      <h2 class="section-title" style="max-width:400px;">Up and running in 30 seconds.</h2>
+      <p style="color:var(--gray);margin-top:1.25rem;line-height:1.7;font-weight:400;font-size:0.95rem;">
+        pkgprobe is available on PyPI and runs anywhere Python 3.9+ is installed.
+        No agent. No cloud dependency. Fully local analysis.
+      </p>
+      <div style="margin-top:2rem;display:flex;gap:1rem;flex-wrap:wrap;">
+        <a href="https://pypi.org/project/pkgprobe" target="_blank" class="btn-primary">View on PyPI ↗</a>
+        <a href="https://github.com/tijan/pkgprobe" target="_blank" class="btn-secondary">Documentation</a>
+      </div>
+    </div>
+    <div>
+      <div class="install-code">
+        <div class="code-tab-bar">
+          <div class="code-tab active">pip</div>
+          <div class="code-tab">pipx</div>
+          <div class="code-tab">from source</div>
+        </div>
+        <div class="code-body">
+          <div><span class="t-comment"># Install from PyPI</span></div>
+          <div><span class="t-prompt">$</span> <span class="t-cmd">pip install pkgprobe</span></div>
+          <div>&nbsp;</div>
+          <div><span class="t-comment"># Analyze an installer</span></div>
+          <div><span class="t-prompt">$</span> <span class="t-cmd">pkgprobe analyze ./setup.msi</span></div>
+          <div>&nbsp;</div>
+          <div><span class="t-comment"># Export JSON report</span></div>
+          <div><span class="t-prompt">$</span> <span class="t-cmd">pkgprobe analyze ./setup.msi <span class="t-key">--output</span> report.json</span></div>
+          <div>&nbsp;</div>
+          <div><span class="t-comment"># Python API</span></div>
+          <div><span class="t-key">from</span> <span class="t-cmd">pkgprobe</span> <span class="t-key">import</span> <span class="t-val">analyze</span></div>
+          <div><span class="t-val">result</span> <span class="t-cmd">=</span> <span class="t-val">analyze</span>(<span class="t-cmd">"./ChromeSetup.exe"</span>)</div>
+          <div><span class="t-key">print</span>(<span class="t-val">result</span>.<span class="t-key">publisher</span>)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Deploy smarter.<br /><span style="color:var(--orange);">Start probing.</span></h2>
+  <p>Join the community building the world's most comprehensive Windows installer dataset. Free forever, open source.</p>
+  <div class="cta-actions">
+    <a href="https://pypi.org/project/pkgprobe" target="_blank" class="btn-primary">⚡ Install Now — It's Free</a>
+    <a href="https://github.com/tijan/pkgprobe" target="_blank" class="btn-secondary">★ Star on GitHub</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <span class="pkg">pkg</span><span class="probe">probe</span><span class="io">.io</span>
+  </div>
+  <ul class="footer-links">
+    <li><a href="https://github.com/tijan/pkgprobe" target="_blank">GitHub</a></li>
+    <li><a href="https://pypi.org/project/pkgprobe" target="_blank">PyPI</a></li>
+    <li><a href="#">Docs</a></li>
+    <li><a href="#">Changelog</a></li>
+  </ul>
+  <div class="footer-copy">© 2025 pkgprobe.io — Open Source</div>
+</footer>
+
+</body>
+</html>
