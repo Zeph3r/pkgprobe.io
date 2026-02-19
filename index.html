@@ -64,14 +64,18 @@
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      font-weight: 800;
-      font-size: 1.15rem;
-      letter-spacing: -0.01em;
       text-decoration: none;
     }
-    .nav-logo .pkg { color: var(--white); }
-    .nav-logo .probe { color: var(--orange); }
-    .nav-logo .io { color: var(--blue-bright); font-size: 0.9rem; }
+    .nav-logo img {
+      height: 36px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 0 8px rgba(249,115,22,0.25));
+      transition: filter 0.2s;
+    }
+    .nav-logo:hover img {
+      filter: drop-shadow(0 0 14px rgba(249,115,22,0.5));
+    }
 
     .nav-links {
       display: flex;
@@ -618,7 +622,7 @@
 <!-- NAV -->
 <nav>
   <a href="#" class="nav-logo">
-    <span class="pkg">pkg</span><span class="probe">probe</span><span class="io">.io</span>
+    <img width="1024" height="1024" alt="1771491669940_image" src="https://github.com/user-attachments/assets/cc842bfb-780d-43fd-a2b9-7a25fa3ec6a5" alt="pkgprobe logo" class="hero-logo-img" />
   </a>
   <ul class="nav-links">
     <li><a href="#features">Features</a></li>
