@@ -63,19 +63,21 @@
     .nav-logo {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.6rem;
       text-decoration: none;
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: -0.03em;
     }
     .nav-logo img {
-      height: 36px;
+      height: 32px;
       width: auto;
       object-fit: contain;
-      filter: drop-shadow(0 0 8px rgba(249,115,22,0.25));
-      transition: filter 0.2s;
     }
-    .nav-logo:hover img {
-      filter: drop-shadow(0 0 14px rgba(249,115,22,0.5));
-    }
+    .nav-logo .pkg { color: var(--white); }
+    .nav-logo .probe { color: var(--orange); }
+    .nav-logo .io { color: var(--blue-bright); font-size: 0.9rem; }
+    .nav-wordmark { display: inline-flex; align-items: baseline; }
 
     .nav-links {
       display: flex;
@@ -621,9 +623,7 @@
 
 <!-- NAV -->
 <nav>
-  <a href="#" class="nav-logo">
-    <img src="./img/1771491669940_image.png" alt="pkgprobe logo" style="height: 50px; width: auto;" />
-  </a>
+  <a href="#" class="nav-logo"><img src="./img/pkgprobe_logo_notext.png" alt="pkgprobe logo" onerror="this.style.display='none'" /><span class="nav-wordmark"><span class="pkg">pkg</span><span class="probe">probe</span><span class="io">.io</span></span></a>
   <ul class="nav-links">
     <li><a href="#features">Features</a></li>
     <li><a href="#how">How It Works</a></li>
@@ -636,7 +636,7 @@
 <!-- HERO -->
 <section class="hero">
   <div class="hero-badge">v0.1.0 — Now on PyPI</div>
-  <img src="./img/1771491669940_image.png" alt="pkgprobe logo" style="width: 250px; height: 250px; object-fit: contain;" />
+  <img src="./img/1771491669940_image.png" alt="pkgprobe logo" style="width: 1024px; height: 1024px; object-fit: contain;" />
   <h1>
     X-Ray Vision for<br />
     <span class="accent-orange">Windows</span> <span class="accent-blue">Installers</span>
