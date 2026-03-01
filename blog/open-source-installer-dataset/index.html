@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Why We're Building an Open Installer Intelligence Dataset — pkgprobe.io</title>
+  <link rel="icon" type="image/svg+xml" href="./img/favicon.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="./img/apple-touch-icon.png">
+  <meta name="theme-color" content="#080a0e">
+  <meta property="og:title" content="Why We're Building an Open Installer Intelligence Dataset — pkgprobe.io">
+  <meta property="og:description" content="Every packaging engineer re-learns the same things. Every enterprise rebuilds the same spreadsheet. It's tribal knowledge — and tribal knowledge doesn't scale.">
+  <meta property="og:image" content="https://pkgprobe.io/img/pkgprobe_logo_notext.png">
+  <meta property="og:url" content="https://pkgprobe.io/blog/open-source-installer-dataset">
+  <meta property="og:type" content="article">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --orange: #f97316;
+      --orange-dim: #c2560f;
+      --blue: #3b82f6;
+      --blue-bright: #60a5fa;
+      --white: #f8fafc;
+      --gray: #94a3b8;
+      --dark: #080a0e;
+      --dark-2: #0f1319;
+      --dark-3: #161c26;
+      --dark-4: #1e2733;
+      --border: rgba(255,255,255,0.07);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--dark);
+      color: var(--white);
+      font-family: 'Syne', sans-serif;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 64px;
+      background: rgba(8,10,14,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: -0.01em;
+      flex-shrink: 0;
+    }
+    .nav-logo img { height: 52px; width: auto; object-fit: contain; }
+    .nav-logo .pkg   { color: var(--white); }
+    .nav-logo .probe { color: var(--orange); }
+    .nav-logo .io    { color: var(--blue-bright); font-size: 0.9rem; }
+    .nav-wordmark { display: inline-flex; align-items: baseline; }
+
+    .nav-center {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      list-style: none;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .nav-center li a {
+      color: var(--gray);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+      padding: 0.35rem 0.9rem;
+      border-radius: 6px;
+      display: block;
+    }
+    .nav-center li a:hover,
+    .nav-center li a.active { color: var(--white); }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-shrink: 0;
+    }
+    .nav-gh {
+      color: var(--gray) !important;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+    }
+    .nav-gh:hover { color: var(--white) !important; }
+    .nav-divider { width: 1px; height: 22px; background: var(--border); }
+    .nav-app-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: linear-gradient(135deg, rgba(249,115,22,0.15) 0%, rgba(59,130,246,0.15) 100%);
+      border: 1px solid rgba(249,115,22,0.4);
+      color: var(--white) !important;
+      text-decoration: none;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.45rem 1rem;
+      border-radius: 7px;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+      white-space: nowrap;
+    }
+    .nav-app-btn:hover {
+      border-color: rgba(249,115,22,0.7);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(249,115,22,0.2), 0 0 0 1px rgba(249,115,22,0.1);
+    }
+    .nav-app-btn .live-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      flex-shrink: 0;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
+      50%       { box-shadow: 0 0 0 4px rgba(34,197,94,0); }
+    }
+
+    /* ── ARTICLE LAYOUT ── */
+    .article-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 7rem 2rem 6rem;
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 4rem;
+      align-items: start;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── ARTICLE HEADER ── */
+    .article-header {
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.6s ease both;
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--gray);
+      text-decoration: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--orange); }
+    .back-link svg { transition: transform 0.2s; }
+    .back-link:hover svg { transform: translateX(-3px); }
+
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .post-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 500;
+      padding: 0.25rem 0.7rem;
+      border-radius: 100px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .tag-orange { background: rgba(249,115,22,0.12); color: var(--orange); border: 1px solid rgba(249,115,22,0.25); }
+    .tag-blue   { background: rgba(96,165,250,0.12);  color: var(--blue-bright); border: 1px solid rgba(96,165,250,0.25); }
+    .tag-green  { background: rgba(34,197,94,0.10);   color: #86efac; border: 1px solid rgba(34,197,94,0.2); }
+    .tag-purple { background: rgba(167,139,250,0.10); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.2); }
+
+    .article-date      { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--gray); }
+    .article-read-time { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--gray); }
+
+    .article-title {
+      font-size: clamp(1.9rem, 4vw, 2.9rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 1.25rem;
+    }
+    .article-lead {
+      color: var(--gray);
+      font-size: 1.05rem;
+      font-weight: 400;
+      line-height: 1.75;
+      border-left: 3px solid var(--orange);
+      padding-left: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── HERO VISUAL ── */
+    .article-hero-terminal {
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+    .t-bar {
+      background: var(--dark-3);
+      padding: 0.6rem 1rem;
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .t-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .td-red    { background: #ef4444; }
+    .td-yellow { background: #f59e0b; }
+    .td-green  { background: #22c55e; }
+    .t-bar-label { margin-left: 0.6rem; color: var(--gray); font-size: 0.68rem; letter-spacing: 0.05em; }
+    .t-body { padding: 1.5rem 1.75rem; line-height: 2; }
+    .t-prompt  { color: var(--blue-bright); }
+    .t-cmd     { color: var(--white); }
+    .t-key     { color: var(--orange); }
+    .t-val     { color: #86efac; }
+    .t-val-bad { color: #f87171; }
+    .t-val-warn{ color: #fbbf24; }
+    .t-comment { color: var(--gray); }
+    .t-section { color: var(--gray); font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    .t-divider { border: none; border-top: 1px solid var(--border); margin: 0.75rem 0; }
+
+    /* ── ARTICLE BODY ── */
+    .article-body {
+      color: #cbd5e1;
+      font-size: 0.97rem;
+      font-weight: 400;
+      line-height: 1.85;
+      animation: fadeUp 0.6s 0.15s ease both;
+    }
+    .article-body h2 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      margin-top: 3rem;
+      margin-bottom: 1rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .article-body h2:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+    .h2-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--orange);
+      background: rgba(249,115,22,0.1);
+      border: 1px solid rgba(249,115,22,0.2);
+      padding: 0.2rem 0.55rem;
+      border-radius: 5px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
+    }
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-top: 1.75rem;
+      margin-bottom: 0.6rem;
+    }
+    .article-body p { margin-bottom: 1.1rem; }
+    .article-body ul, .article-body ol { margin: 0.75rem 0 1.25rem 1.5rem; }
+    .article-body li { margin-bottom: 0.45rem; }
+    .article-body strong { color: var(--white); font-weight: 700; }
+    .article-body code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      background: var(--dark-3);
+      border: 1px solid var(--border);
+      color: var(--blue-bright);
+      padding: 0.15em 0.45em;
+      border-radius: 4px;
+    }
+
+    /* Code / data blocks */
+    .code-block {
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1.5rem 0;
+    }
+    .code-block-header {
+      background: var(--dark-3);
+      padding: 0.55rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .code-block-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--gray);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .code-block-lang {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--orange);
+      opacity: 0.7;
+      letter-spacing: 0.06em;
+    }
+    .code-block pre {
+      padding: 1.25rem 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.85;
+      color: #e2e8f0;
+      overflow-x: auto;
+      margin: 0;
+    }
+    .code-block pre .c-key  { color: var(--orange); }
+    .code-block pre .c-val  { color: #86efac; }
+    .code-block pre .c-str  { color: #86efac; }
+    .code-block pre .c-num  { color: #fb923c; }
+    .code-block pre .c-gray { color: var(--gray); }
+    .code-block pre .c-blue { color: var(--blue-bright); }
+    .code-block pre .c-warn { color: #fbbf24; }
+    .code-block pre .c-bad  { color: #f87171; }
+
+    /* Callouts */
+    .callout {
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin: 1.75rem 0;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.1rem; }
+    .callout-body { flex: 1; }
+    .callout-body strong { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .callout-body p { font-size: 0.87rem; line-height: 1.65; margin: 0; color: inherit; }
+    .callout-warning { background: rgba(249,115,22,0.07); border: 1px solid rgba(249,115,22,0.2);  color: #fed7aa; }
+    .callout-info    { background: rgba(96,165,250,0.07);  border: 1px solid rgba(96,165,250,0.2);  color: #bfdbfe; }
+    .callout-tip     { background: rgba(34,197,94,0.07);   border: 1px solid rgba(34,197,94,0.2);   color: #bbf7d0; }
+    .callout-neutral { background: rgba(255,255,255,0.03); border: 1px solid var(--border);         color: #cbd5e1; }
+
+    /* Before/After comparison strip */
+    .compare-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1.75rem 0;
+    }
+    .compare-card {
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+    }
+    .compare-card-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .compare-card.before .compare-card-label { color: #f87171; }
+    .compare-card.after  .compare-card-label { color: #86efac; }
+    .compare-card ul { margin: 0; padding-left: 1.1rem; }
+    .compare-card li {
+      font-size: 0.82rem;
+      line-height: 1.55;
+      margin-bottom: 0.4rem;
+    }
+    .compare-card.before li { color: #fca5a5; }
+    .compare-card.after  li { color: #bbf7d0; }
+
+    /* Flywheel diagram */
+    .flywheel {
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin: 1.75rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      text-align: center;
+    }
+    .flywheel-label {
+      font-size: 0.62rem;
+      color: var(--gray);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .flywheel-steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0;
+    }
+    .flywheel-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .flywheel-dot {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: rgba(249,115,22,0.12);
+      border: 1px solid rgba(249,115,22,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+    .flywheel-step span {
+      font-size: 0.68rem;
+      color: var(--gray);
+      max-width: 80px;
+      line-height: 1.35;
+    }
+    .flywheel-arrow {
+      font-size: 1rem;
+      color: var(--orange);
+      opacity: 0.5;
+      padding: 0 0.35rem;
+      padding-bottom: 1.2rem;
+    }
+
+    /* Outcome grid */
+    .outcome-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin: 1.75rem 0;
+    }
+    .outcome-card {
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .outcome-icon { font-size: 1.4rem; }
+    .outcome-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.3;
+    }
+    .outcome-desc {
+      font-size: 0.78rem;
+      color: var(--gray);
+      line-height: 1.5;
+    }
+
+    /* Conclusion */
+    .article-conclusion {
+      margin-top: 3rem;
+      padding-top: 2.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .conclusion-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--orange);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .article-conclusion blockquote {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.45;
+      letter-spacing: -0.01em;
+      padding-left: 1.25rem;
+      border-left: 3px solid var(--orange);
+    }
+    .article-conclusion p {
+      color: var(--gray);
+      font-size: 0.95rem;
+      line-height: 1.75;
+      margin-top: 1.25rem;
+    }
+
+    /* CTA */
+    .article-cta {
+      margin-top: 2.5rem;
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+    .article-cta-text h3 { font-size: 1.05rem; font-weight: 800; margin-bottom: 0.4rem; }
+    .article-cta-text p  { color: var(--gray); font-size: 0.85rem; line-height: 1.6; margin: 0; }
+    .btn-primary {
+      background: var(--orange);
+      color: #000;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 0.7rem 1.4rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.2s, transform 0.15s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-primary:hover { background: #fb923c; transform: translateY(-2px); }
+
+    /* ── SIDEBAR ── */
+    .article-sidebar {
+      position: sticky;
+      top: 88px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+    .sidebar-card {
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .sidebar-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--gray);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .toc-list { list-style: none; display: flex; flex-direction: column; gap: 0.1rem; }
+    .toc-list li a {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: var(--gray);
+      text-decoration: none;
+      font-size: 0.8rem;
+      padding: 0.4rem 0.5rem;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+      line-height: 1.35;
+    }
+    .toc-list li a:hover { color: var(--white); background: rgba(255,255,255,0.04); }
+    .toc-list li a.active { color: var(--orange); }
+    .toc-num { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--orange); flex-shrink: 0; opacity: 0.6; }
+
+    .related-post {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none;
+      color: inherit;
+      transition: opacity 0.2s;
+    }
+    .related-post:last-child { border-bottom: none; padding-bottom: 0; }
+    .related-post:hover { opacity: 0.75; }
+    .related-post-tag   { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; color: var(--orange); letter-spacing: 0.06em; text-transform: uppercase; }
+    .related-post-title { font-size: 0.82rem; font-weight: 600; line-height: 1.35; color: var(--white); }
+    .related-post-date  { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; color: var(--gray); }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--dark-2);
+    }
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: -0.01em;
+    }
+    .footer-logo .pkg   { color: var(--white); }
+    .footer-logo .probe { color: var(--orange); }
+    .footer-logo .io    { color: var(--blue-bright); }
+    .footer-links { display: flex; gap: 2rem; list-style: none; }
+    .footer-links a { color: var(--gray); text-decoration: none; font-size: 0.82rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--white); }
+    .footer-copy { font-size: 0.78rem; color: var(--gray); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1080px) { .nav-center { display: none; } }
+    @media (max-width: 720px)  { .nav-gh { display: none; } .nav-divider { display: none; } }
+    @media (max-width: 900px) {
+      .article-wrapper { grid-template-columns: 1fr; gap: 3rem; padding-top: 6rem; }
+      .article-sidebar { position: static; }
+      .article-cta { flex-direction: column; align-items: flex-start; }
+      .compare-strip { grid-template-columns: 1fr; }
+      .outcome-grid  { grid-template-columns: 1fr 1fr; }
+      footer { flex-direction: column; gap: 1.5rem; text-align: center; padding: 2rem; }
+      .footer-links { flex-wrap: wrap; justify-content: center; }
+    }
+    @media (max-width: 600px) {
+      nav { padding: 0 1.25rem; }
+      .article-wrapper { padding: 5rem 1.25rem 4rem; }
+      .article-title { font-size: 1.75rem; }
+      .flywheel-steps { gap: 0; }
+      .outcome-grid  { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">
+    <img src="./img/pkgprobe_logo_notext.png" alt="pkgprobe logo" onerror="this.style.display='none'" />
+    <span class="nav-wordmark"><span class="pkg">pkg</span><span class="probe">probe</span><span class="io">.io</span></span>
+  </a>
+  <ul class="nav-center">
+    <li><a href="/#features">Features</a></li>
+    <li><a href="/#how">How it works</a></li>
+    <li><a href="/#usecases">Use cases</a></li>
+    <li><a href="/#install">Install</a></li>
+    <li><a href="/blog" class="active">Blog</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="https://github.com/Zeph3r/pkgprobe" target="_blank" class="nav-gh">GitHub</a>
+    <div class="nav-divider"></div>
+    <a href="https://app.pkgprobe.io" class="nav-app-btn">
+      <span class="live-dot"></span>
+      Launch App
+    </a>
+  </div>
+</nav>
+
+<!-- ARTICLE -->
+<div class="article-wrapper">
+
+  <main>
+
+    <header class="article-header">
+      <a href="/blog" class="back-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Blog
+      </a>
+
+      <div class="article-meta">
+        <span class="post-tag tag-blue">Open Source</span>
+        <span class="post-tag tag-purple">Community</span>
+        <span class="article-date">Nov 28, 2024</span>
+        <span class="article-read-time">⏱ 6 min read</span>
+      </div>
+
+      <h1 class="article-title">Why We're Building an Open Installer Intelligence Dataset</h1>
+
+      <p class="article-lead">Every packaging engineer re-learns the same things. Every enterprise rebuilds the same internal spreadsheet of silent switches, edge cases, and known SCCM-breaking behaviors. It's tribal knowledge — and tribal knowledge doesn't scale.</p>
+    </header>
+
+    <!-- Hero terminal -->
+    <div class="article-hero-terminal">
+      <div class="t-bar">
+        <span class="t-dot td-red"></span>
+        <span class="t-dot td-yellow"></span>
+        <span class="t-dot td-green"></span>
+        <span class="t-bar-label">pkgprobe dataset — framework record</span>
+      </div>
+      <div class="t-body">
+        <div class="t-section">// community-verified intelligence</div>
+        <div>&nbsp;</div>
+        <div><span class="t-key">  framework          </span><span class="t-val">NSIS</span></div>
+        <div><span class="t-key">  version_range      </span><span class="t-val">2.x – 3.x</span></div>
+        <div><span class="t-key">  silent_flag        </span><span class="t-val">/S  (confidence: 0.93)</span></div>
+        <div><span class="t-key">  common_failure     </span><span class="t-val-warn">GUI spawn if custom plugin present</span></div>
+        <div><span class="t-key">  cve_frequency      </span><span class="t-val">low</span></div>
+        <div><span class="t-key">  observations       </span><span class="t-val">4,812 analyzers</span></div>
+        <hr class="t-divider"/>
+        <div class="t-section">// structured · queryable · versioned · community-maintained</div>
+      </div>
+    </div>
+
+    <article class="article-body">
+
+      <h2 id="s1"><span class="h2-num">01</span> The Problem Nobody Talks About</h2>
+      <p>Right now, installer knowledge lives in the worst possible places. Slack threads. Reddit posts. SCCM admin forums. Individual engineers' notebooks. The memory of the person who left six months ago.</p>
+      <p>Every team maintains some version of the same internal document:</p>
+      <ul>
+        <li>Silent switches that actually work (vs. ones that <em>should</em> work per the docs)</li>
+        <li>Installer frameworks and their quirks</li>
+        <li>Known "this spawns GUI even with <code>/S</code>" behaviors</li>
+        <li>Known "this breaks SCCM detection" edge cases</li>
+        <li>One-off notes from production incidents that never got formalized</li>
+      </ul>
+      <p>This knowledge is rebuilt from scratch at every org, by every team, for every tool. That's an enormous amount of collective waste — and it means every new engineer starts at zero.</p>
+
+      <div class="callout callout-warning">
+        <div class="callout-icon">⚠️</div>
+        <div class="callout-body">
+          <strong>Tribal knowledge is fragile by definition</strong>
+          <p>When the person who knows "that Vendor X installer always needs a <code>TRANSFORMS</code> override in SCCM" leaves the org, that knowledge leaves with them. There's no system that captures it. There's no feed you can subscribe to. It just disappears.</p>
+        </div>
+      </div>
+
+      <h2 id="s2"><span class="h2-num">02</span> Installers Are Infrastructure</h2>
+      <p>We've already accepted that source code is infrastructure. Containers are infrastructure. CI pipelines are infrastructure. We treat all of these with structured tooling, versioning, documentation, and shared community knowledge.</p>
+      <p>But installers — the executable artifacts that actually touch production endpoints — are still treated like things you "just run."</p>
+      <p>That's outdated thinking. Installers are executable supply chain components. They deserve the same level of structured intelligence as SBOMs, dependency graphs, and CVE feeds.</p>
+
+      <div class="compare-strip">
+        <div class="compare-card before">
+          <div class="compare-card-label">✗ how we treat installers today</div>
+          <ul>
+            <li>Tribal knowledge in Slack threads</li>
+            <li>Manually rebuilt per-org spreadsheets</li>
+            <li>No structured framework fingerprints</li>
+            <li>Silent flags discovered by trial and error</li>
+            <li>Risk assessed post-deployment</li>
+          </ul>
+        </div>
+        <div class="compare-card after">
+          <div class="compare-card-label">✓ how we should treat installers</div>
+          <ul>
+            <li>Structured, queryable dataset</li>
+            <li>Community-maintained and versioned</li>
+            <li>Framework fingerprints with confidence scores</li>
+            <li>Silent flags ranked by observed reliability</li>
+            <li>Risk modeled before deployment</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2 id="s3"><span class="h2-num">03</span> What's Missing Today</h2>
+      <p>There is no public, structured, evolving dataset of installer intelligence. Not for framework fingerprints. Not for silent switch reliability. Not for framework-specific quirks or behavioral risk patterns.</p>
+      <p>The gap isn't just inconvenient — it's a security problem. Without structured knowledge, teams can't consistently detect anomalous installer behavior, can't confidently score risk before deployment, and can't learn from each other's discoveries.</p>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="code-block-label">what a structured dataset record looks like</span>
+          <span class="code-block-lang">JSON</span>
+        </div>
+        <pre>{
+  <span class="c-key">"framework"</span>:       <span class="c-str">"NSIS"</span>,
+  <span class="c-key">"version_range"</span>:   <span class="c-str">"2.x – 3.x"</span>,
+  <span class="c-key">"silent_flags"</span>: [
+    { <span class="c-key">"flag"</span>: <span class="c-str">"/S"</span>,          <span class="c-key">"confidence"</span>: <span class="c-num">0.93</span> },
+    { <span class="c-key">"flag"</span>: <span class="c-str">"/silent"</span>,     <span class="c-key">"confidence"</span>: <span class="c-num">0.41</span> }
+  ],
+  <span class="c-key">"failure_modes"</span>: [
+    <span class="c-str">"GUI spawn if custom plugin present"</span>,
+    <span class="c-str">"Exit code 1 on reboot-required installs"</span>
+  ],
+  <span class="c-key">"cve_pattern"</span>:     <span class="c-str">"low_frequency"</span>,
+  <span class="c-key">"observations"</span>:   <span class="c-num">4812</span>,
+  <span class="c-key">"last_updated"</span>:   <span class="c-str">"2025-01-18"</span>
+}</pre>
+      </div>
+
+      <p>Not just "NSIS usually supports <code>/S</code>" — but confidence-scored, version-ranged, failure-mode-documented intelligence. Structured. Queryable. Versioned.</p>
+
+      <h2 id="s4"><span class="h2-num">04</span> Why Open?</h2>
+      <p>Because installers are universal. Every enterprise deploys them. Every IT and security team deals with them. This isn't niche knowledge that benefits one company — it's foundational infrastructure knowledge that benefits everyone.</p>
+      <p>When one hospital discovers a silent flag anomaly, that knowledge shouldn't die in their Jira backlog. When one SaaS team identifies a malicious MSI pattern, it shouldn't live only in their SIEM. When one packaging engineer reverse-engineers a bootstrapper, that work shouldn't be invisible to everyone else.</p>
+
+      <div class="callout callout-tip">
+        <div class="callout-icon">💡</div>
+        <div class="callout-body">
+          <strong>Knowledge should compound, not evaporate</strong>
+          <p>Open intelligence compounds. Closed intelligence evaporates. Every discovery that gets structured and shared becomes permanently available to every team that comes after. That's the model that made vulnerability databases work — and it's the same model that can work for installer intelligence.</p>
+        </div>
+      </div>
+
+      <h2 id="s5"><span class="h2-num">05</span> The Data Flywheel</h2>
+      <p>The power of a shared dataset isn't just additive — it's multiplicative. As the dataset grows, the intelligence it produces improves non-linearly. More observations mean better confidence scores. Better confidence scores mean more reliable automation. More reliable automation drives more adoption. More adoption generates more data.</p>
+
+      <div class="flywheel">
+        <div class="flywheel-label">// the compounding intelligence loop</div>
+        <div class="flywheel-steps">
+          <div class="flywheel-step">
+            <div class="flywheel-dot">📦</div>
+            <span>More installers analyzed</span>
+          </div>
+          <div class="flywheel-arrow">→</div>
+          <div class="flywheel-step">
+            <div class="flywheel-dot">🔍</div>
+            <span>Better heuristics</span>
+          </div>
+          <div class="flywheel-arrow">→</div>
+          <div class="flywheel-step">
+            <div class="flywheel-dot">📊</div>
+            <span>Higher confidence</span>
+          </div>
+          <div class="flywheel-arrow">→</div>
+          <div class="flywheel-step">
+            <div class="flywheel-dot">🛡️</div>
+            <span>Safer deployments</span>
+          </div>
+          <div class="flywheel-arrow">→</div>
+          <div class="flywheel-step">
+            <div class="flywheel-dot">🔁</div>
+            <span>More adoption &amp; data</span>
+          </div>
+        </div>
+      </div>
+
+      <p>Data moat beats feature moat. Any competitor can replicate a feature. No one can replicate years of compounded, community-verified installer observations.</p>
+
+      <h2 id="s6"><span class="h2-num">06</span> What This Enables</h2>
+      <p>With enough structured installer data, analysis stops being reactive and becomes predictive. The difference isn't just speed — it's the entire posture shift from "discover vulnerabilities after deployment" to "model risk before anything touches an endpoint."</p>
+
+      <div class="outcome-grid">
+        <div class="outcome-card">
+          <div class="outcome-icon">🎯</div>
+          <div class="outcome-title">Predict silent flags with statistical confidence</div>
+          <div class="outcome-desc">No more trial and error. Ranked recommendations backed by real-world observations.</div>
+        </div>
+        <div class="outcome-card">
+          <div class="outcome-icon">🚨</div>
+          <div class="outcome-title">Flag anomalous framework behavior</div>
+          <div class="outcome-desc">Detect when an installer deviates from known-good patterns for its framework.</div>
+        </div>
+        <div class="outcome-card">
+          <div class="outcome-icon">🔗</div>
+          <div class="outcome-title">Detect repackaged installers</div>
+          <div class="outcome-desc">Fingerprint matching surfaces forks and unauthorized repackaging automatically.</div>
+        </div>
+        <div class="outcome-card">
+          <div class="outcome-icon">⚡</div>
+          <div class="outcome-title">Faster signature mismatch detection</div>
+          <div class="outcome-desc">Global telemetry means anomalies surface faster than any single org could achieve alone.</div>
+        </div>
+        <div class="outcome-card">
+          <div class="outcome-icon">📐</div>
+          <div class="outcome-title">Quantify deployment risk</div>
+          <div class="outcome-desc">Replace gut-feel approval with a scored, reproducible risk model for every installer.</div>
+        </div>
+        <div class="outcome-card">
+          <div class="outcome-icon">🌐</div>
+          <div class="outcome-title">Crowd-detect malicious patterns</div>
+          <div class="outcome-desc">Malicious packaging behaviors observed anywhere become known everywhere, instantly.</div>
+        </div>
+      </div>
+
+      <h2 id="s7"><span class="h2-num">07</span> What This Is Not</h2>
+      <p>To be clear: this isn't about exposing proprietary installer content. The dataset captures <em>mechanics</em>, not <em>content</em>. It records framework signatures, behavioral fingerprints, metadata patterns, and heuristic confidence — not anything specific to the software being packaged.</p>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">ℹ️</div>
+        <div class="callout-body">
+          <strong>Mechanics, not secrets</strong>
+          <p>The installer intelligence dataset is analogous to a CVE database or a malware signature feed — it describes <em>how</em> things behave, not <em>what</em> is inside any specific piece of software. No proprietary code, no vendor data, no business-sensitive information.</p>
+        </div>
+      </div>
+
+      <!-- Conclusion -->
+      <div class="article-conclusion">
+        <div class="conclusion-label">// final thought</div>
+        <blockquote>The best infrastructure projects don't just solve a problem. They convert chaos into structured knowledge.</blockquote>
+        <p>Installers have lived in chaos for decades. The knowledge that every team needs has always existed — it just exists in a hundred different spreadsheets, Slack threads, and the memories of engineers who've since moved on. The dataset changes that. It gives that knowledge a permanent, structured home — and makes it better every time someone uses it.</p>
+      </div>
+
+      <!-- CTA -->
+      <div class="article-cta">
+        <div class="article-cta-text">
+          <h3>Help build the dataset</h3>
+          <p>Every installer you analyze with pkgprobe contributes to the intelligence corpus. Start analyzing, and start contributing.</p>
+        </div>
+        <a href="https://github.com/Zeph3r/pkgprobe" class="btn-primary">View on GitHub →</a>
+      </div>
+
+    </article>
+  </main>
+
+  <!-- SIDEBAR -->
+  <aside class="article-sidebar">
+
+    <div class="sidebar-card">
+      <div class="sidebar-label">// in this article</div>
+      <ul class="toc-list">
+        <li><a href="#s1"><span class="toc-num">01</span> The Problem Nobody Talks About</a></li>
+        <li><a href="#s2"><span class="toc-num">02</span> Installers Are Infrastructure</a></li>
+        <li><a href="#s3"><span class="toc-num">03</span> What's Missing Today</a></li>
+        <li><a href="#s4"><span class="toc-num">04</span> Why Open?</a></li>
+        <li><a href="#s5"><span class="toc-num">05</span> The Data Flywheel</a></li>
+        <li><a href="#s6"><span class="toc-num">06</span> What This Enables</a></li>
+        <li><a href="#s7"><span class="toc-num">07</span> What This Is Not</a></li>
+      </ul>
+    </div>
+
+    <div class="sidebar-card">
+      <div class="sidebar-label">// related posts</div>
+
+      <a href="/blog/msi-metadata-deep-dive" class="related-post">
+        <span class="related-post-tag">🔍 Security</span>
+        <span class="related-post-title">What MSI Metadata Actually Tells You About an Installer's Risk</span>
+        <span class="related-post-date">Jan 28, 2025</span>
+      </a>
+
+      <a href="/blog/cicd-pipeline-integration" class="related-post">
+        <span class="related-post-tag">🚀 DevOps</span>
+        <span class="related-post-title">Validating Installer Artifacts in CI/CD with pkgprobe's Python API</span>
+        <span class="related-post-date">Nov 14, 2024</span>
+      </a>
+
+      <a href="/blog/silent-install-switches" class="related-post">
+        <span class="related-post-tag">⚙️ Deployment</span>
+        <span class="related-post-title">Silent Install Switches: Stop Guessing, Start Probing</span>
+        <span class="related-post-date">Jan 15, 2025</span>
+      </a>
+
+      <a href="/blog/cve-matching-workflow" class="related-post">
+        <span class="related-post-tag">🛡️ Security</span>
+        <span class="related-post-title">Integrating pkgprobe into a Vulnerability Management Workflow</span>
+        <span class="related-post-date">Jan 08, 2025</span>
+      </a>
+    </div>
+
+    <div class="sidebar-card">
+      <div class="sidebar-label">// share this post</div>
+      <div style="display:flex;flex-direction:column;gap:0.6rem;">
+        <a href="https://twitter.com/intent/tweet?text=Why+We%27re+Building+an+Open+Installer+Intelligence+Dataset&url=https://pkgprobe.io/blog/open-source-installer-dataset" target="_blank" style="display:inline-flex;align-items:center;gap:0.6rem;color:var(--gray);text-decoration:none;font-size:0.82rem;padding:0.5rem 0.75rem;background:var(--dark-3);border:1px solid var(--border);border-radius:7px;transition:border-color 0.2s,color 0.2s;" onmouseover="this.style.color='var(--white)';this.style.borderColor='rgba(255,255,255,0.15)'" onmouseout="this.style.color='var(--gray)';this.style.borderColor='var(--border)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.63L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg>
+          Share on X
+        </a>
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://pkgprobe.io/blog/open-source-installer-dataset" target="_blank" style="display:inline-flex;align-items:center;gap:0.6rem;color:var(--gray);text-decoration:none;font-size:0.82rem;padding:0.5rem 0.75rem;background:var(--dark-3);border:1px solid var(--border);border-radius:7px;transition:border-color 0.2s,color 0.2s;" onmouseover="this.style.color='var(--white)';this.style.borderColor='rgba(255,255,255,0.15)'" onmouseout="this.style.color='var(--gray)';this.style.borderColor='var(--border)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+          Share on LinkedIn
+        </a>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <a href="/" class="footer-logo">
+    <img src="./img/pkgprobe_logo_notext.png" alt="pkgprobe logo" onerror="this.style.display='none'" style="height:40px;width:auto;object-fit:contain;" />
+    <span class="nav-wordmark"><span class="pkg">pkg</span><span class="probe">probe</span><span class="io">.io</span></span>
+  </a>
+  <ul class="footer-links">
+    <li><a href="https://github.com/Zeph3r/pkgprobe" target="_blank">GitHub</a></li>
+    <li><a href="https://pypi.org/project/pkgprobe" target="_blank">PyPI</a></li>
+    <li><a href="/blog">Blog</a></li>
+    <li><a href="#">Docs</a></li>
+    <li><a href="#">Changelog</a></li>
+  </ul>
+  <div class="footer-copy">© 2025 pkgprobe.io — Open Source</div>
+</footer>
+
+<script>
+  const headings = document.querySelectorAll('h2[id]');
+  const tocLinks = document.querySelectorAll('.toc-list a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocLinks.forEach(l => l.classList.remove('active'));
+        const a = document.querySelector(`.toc-list a[href="#${entry.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  headings.forEach(h => observer.observe(h));
+</script>
+
+</body>
+</html>

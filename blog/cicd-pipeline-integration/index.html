@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Validating Installer Artifacts in CI/CD with pkgprobe's Python API — pkgprobe.io</title>
+  <link rel="icon" type="image/svg+xml" href="./img/favicon.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="./img/apple-touch-icon.png">
+  <meta name="theme-color" content="#080a0e">
+  <meta property="og:title" content="Validating Installer Artifacts in CI/CD with pkgprobe's Python API — pkgprobe.io">
+  <meta property="og:description" content="Most CI/CD pipelines never validate the installer artifact itself. Here's how to drop pkgprobe into GitHub Actions or Azure DevOps to gate on signature validity, CVE score, and risk threshold.">
+  <meta property="og:image" content="https://pkgprobe.io/img/pkgprobe_logo_notext.png">
+  <meta property="og:url" content="https://pkgprobe.io/blog/cicd-pipeline-integration">
+  <meta property="og:type" content="article">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@800&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --orange: #f97316;
+      --orange-dim: #c2560f;
+      --blue: #3b82f6;
+      --blue-bright: #60a5fa;
+      --white: #f8fafc;
+      --gray: #94a3b8;
+      --dark: #080a0e;
+      --dark-2: #0f1319;
+      --dark-3: #161c26;
+      --dark-4: #1e2733;
+      --border: rgba(255,255,255,0.07);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--dark);
+      color: var(--white);
+      font-family: 'Syne', sans-serif;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 64px;
+      background: rgba(8,10,14,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: -0.01em;
+      flex-shrink: 0;
+    }
+    .nav-logo img { height: 52px; width: auto; object-fit: contain; }
+    .nav-logo .pkg   { color: var(--white); }
+    .nav-logo .probe { color: var(--orange); }
+    .nav-logo .io    { color: var(--blue-bright); font-size: 0.9rem; }
+    .nav-wordmark { display: inline-flex; align-items: baseline; }
+
+    .nav-center {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      list-style: none;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .nav-center li a {
+      color: var(--gray);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+      padding: 0.35rem 0.9rem;
+      border-radius: 6px;
+      display: block;
+    }
+    .nav-center li a:hover,
+    .nav-center li a.active { color: var(--white); }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .nav-gh {
+      color: var(--gray) !important;
+      text-decoration: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+    }
+    .nav-gh:hover { color: var(--white) !important; }
+
+    .nav-divider { width: 1px; height: 22px; background: var(--border); }
+
+    .nav-app-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: linear-gradient(135deg, rgba(249,115,22,0.15) 0%, rgba(59,130,246,0.15) 100%);
+      border: 1px solid rgba(249,115,22,0.4);
+      color: var(--white) !important;
+      text-decoration: none;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.45rem 1rem;
+      border-radius: 7px;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+      white-space: nowrap;
+    }
+    .nav-app-btn:hover {
+      border-color: rgba(249,115,22,0.7);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(249,115,22,0.2), 0 0 0 1px rgba(249,115,22,0.1);
+    }
+    .nav-app-btn .live-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      flex-shrink: 0;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
+      50%       { box-shadow: 0 0 0 4px rgba(34,197,94,0); }
+    }
+
+    /* ── ARTICLE LAYOUT ── */
+    .article-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 7rem 2rem 6rem;
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 4rem;
+      align-items: start;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── ARTICLE HEADER ── */
+    .article-header {
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--gray);
+      text-decoration: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--orange); }
+    .back-link svg { transition: transform 0.2s; }
+    .back-link:hover svg { transform: translateX(-3px); }
+
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .post-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 500;
+      padding: 0.25rem 0.7rem;
+      border-radius: 100px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .tag-orange { background: rgba(249,115,22,0.12); color: var(--orange); border: 1px solid rgba(249,115,22,0.25); }
+    .tag-blue   { background: rgba(96,165,250,0.12);  color: var(--blue-bright); border: 1px solid rgba(96,165,250,0.25); }
+    .tag-green  { background: rgba(34,197,94,0.10);   color: #86efac; border: 1px solid rgba(34,197,94,0.2); }
+    .tag-purple { background: rgba(167,139,250,0.10); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.2); }
+
+    .article-date  { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--gray); }
+    .article-read-time { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--gray); }
+
+    .article-title {
+      font-size: clamp(1.9rem, 4vw, 2.9rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 1.25rem;
+    }
+
+    .article-lead {
+      color: var(--gray);
+      font-size: 1.05rem;
+      font-weight: 400;
+      line-height: 1.75;
+      border-left: 3px solid var(--orange);
+      padding-left: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── HERO TERMINAL ── */
+    .article-hero-terminal {
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .t-bar {
+      background: var(--dark-3);
+      padding: 0.6rem 1rem;
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .t-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .td-red    { background: #ef4444; }
+    .td-yellow { background: #f59e0b; }
+    .td-green  { background: #22c55e; }
+    .t-bar-label { margin-left: 0.6rem; color: var(--gray); font-size: 0.68rem; letter-spacing: 0.05em; }
+
+    .t-body { padding: 1.5rem 1.75rem; line-height: 2; }
+    .t-prompt  { color: var(--blue-bright); }
+    .t-cmd     { color: var(--white); }
+    .t-key     { color: var(--orange); }
+    .t-val     { color: #86efac; }
+    .t-val-bad { color: #f87171; }
+    .t-val-warn{ color: #fbbf24; }
+    .t-comment { color: var(--gray); }
+    .t-section { color: var(--gray); font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.5rem; }
+    .t-divider { border: none; border-top: 1px solid var(--border); margin: 0.75rem 0; }
+
+    /* ── ARTICLE BODY ── */
+    .article-body {
+      color: #cbd5e1;
+      font-size: 0.97rem;
+      font-weight: 400;
+      line-height: 1.85;
+      animation: fadeUp 0.6s 0.15s ease both;
+    }
+
+    .article-body h2 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      margin-top: 3rem;
+      margin-bottom: 1rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .article-body h2:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+
+    .h2-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--orange);
+      background: rgba(249,115,22,0.1);
+      border: 1px solid rgba(249,115,22,0.2);
+      padding: 0.2rem 0.55rem;
+      border-radius: 5px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
+    }
+
+    .article-body h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-top: 1.75rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .article-body p { margin-bottom: 1.1rem; }
+
+    .article-body ul, .article-body ol { margin: 0.75rem 0 1.25rem 1.5rem; }
+    .article-body li { margin-bottom: 0.45rem; }
+    .article-body strong { color: var(--white); font-weight: 700; }
+
+    /* Inline code */
+    .article-body code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      background: var(--dark-3);
+      border: 1px solid var(--border);
+      color: var(--blue-bright);
+      padding: 0.15em 0.45em;
+      border-radius: 4px;
+    }
+
+    /* Code blocks */
+    .code-block {
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1.5rem 0;
+    }
+    .code-block-header {
+      background: var(--dark-3);
+      padding: 0.55rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .code-block-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--gray);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .code-block-lang {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--orange);
+      opacity: 0.7;
+      letter-spacing: 0.06em;
+    }
+    .code-block pre {
+      padding: 1.25rem 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.85;
+      color: #e2e8f0;
+      overflow-x: auto;
+      margin: 0;
+    }
+    /* Syntax token colors */
+    .code-block pre .c-kw   { color: #c084fc; } /* keyword: def, if, for, raise */
+    .code-block pre .c-fn   { color: var(--blue-bright); } /* function name */
+    .code-block pre .c-str  { color: #86efac; } /* strings */
+    .code-block pre .c-num  { color: #fb923c; } /* numbers */
+    .code-block pre .c-cm   { color: var(--gray); font-style: italic; } /* comment */
+    .code-block pre .c-key  { color: var(--orange); } /* object key / yaml key */
+    .code-block pre .c-val  { color: #86efac; } /* value */
+    .code-block pre .c-bad  { color: #f87171; }
+    .code-block pre .c-warn { color: #fbbf24; }
+    .code-block pre .c-gray { color: var(--gray); }
+    .code-block pre .c-blue { color: var(--blue-bright); }
+    .code-block pre .c-white{ color: var(--white); }
+    .code-block pre .c-attr { color: #7dd3fc; } /* yaml attribute / flag */
+
+    /* Callout boxes */
+    .callout {
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin: 1.75rem 0;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.1rem; }
+    .callout-body { flex: 1; }
+    .callout-body strong { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .callout-body p { font-size: 0.87rem; line-height: 1.65; margin: 0; color: inherit; }
+    .callout-warning { background: rgba(249,115,22,0.07); border: 1px solid rgba(249,115,22,0.2); color: #fed7aa; }
+    .callout-danger  { background: rgba(248,113,113,0.07); border: 1px solid rgba(248,113,113,0.2); color: #fecaca; }
+    .callout-info    { background: rgba(96,165,250,0.07);  border: 1px solid rgba(96,165,250,0.2);  color: #bfdbfe; }
+    .callout-tip     { background: rgba(34,197,94,0.07);   border: 1px solid rgba(34,197,94,0.2);   color: #bbf7d0; }
+
+    /* Flow diagram */
+    .flow-diagram {
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.75rem 2rem;
+      margin: 1.75rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+    }
+    .flow-diagram-label {
+      font-size: 0.62rem;
+      color: var(--gray);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+    .flow-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .flow-step-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+      width: 28px;
+    }
+    .flow-step-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid var(--orange);
+      background: rgba(249,115,22,0.2);
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+    .flow-step-dot.active {
+      background: var(--orange);
+      box-shadow: 0 0 8px rgba(249,115,22,0.5);
+    }
+    .flow-step-line {
+      width: 2px;
+      flex: 1;
+      min-height: 20px;
+      background: var(--border);
+      margin: 3px 0;
+    }
+    .flow-step-content {
+      padding-bottom: 1.25rem;
+      flex: 1;
+    }
+    .flow-step-title { color: var(--white); font-weight: 500; font-size: 0.82rem; }
+    .flow-step-desc  { color: var(--gray); font-size: 0.72rem; margin-top: 0.2rem; line-height: 1.5; }
+    .flow-step-badge {
+      display: inline-block;
+      font-size: 0.6rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 100px;
+      margin-top: 0.35rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .badge-green  { background: rgba(34,197,94,0.12);   color: #86efac; border: 1px solid rgba(34,197,94,0.2); }
+    .badge-orange { background: rgba(249,115,22,0.12);  color: var(--orange); border: 1px solid rgba(249,115,22,0.25); }
+    .badge-blue   { background: rgba(96,165,250,0.12);  color: var(--blue-bright); border: 1px solid rgba(96,165,250,0.25); }
+
+    /* Policy grid */
+    .policy-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1.75rem 0;
+    }
+    .policy-card {
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+    }
+    .policy-card-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--orange);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+    .policy-card ul {
+      margin: 0;
+      padding-left: 1.1rem;
+    }
+    .policy-card li {
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      margin-bottom: 0.35rem;
+      line-height: 1.4;
+    }
+
+    /* Conclusion */
+    .article-conclusion {
+      margin-top: 3rem;
+      padding-top: 2.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .conclusion-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--orange);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .article-conclusion blockquote {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.45;
+      letter-spacing: -0.01em;
+      padding-left: 1.25rem;
+      border-left: 3px solid var(--orange);
+    }
+    .article-conclusion p {
+      color: var(--gray);
+      font-size: 0.95rem;
+      line-height: 1.75;
+      margin-top: 1.25rem;
+    }
+
+    /* CTA */
+    .article-cta {
+      margin-top: 2.5rem;
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+    .article-cta-text h3 { font-size: 1.05rem; font-weight: 800; margin-bottom: 0.4rem; }
+    .article-cta-text p  { color: var(--gray); font-size: 0.85rem; line-height: 1.6; margin: 0; }
+    .btn-primary {
+      background: var(--orange);
+      color: #000;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 0.7rem 1.4rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.2s, transform 0.15s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-primary:hover { background: #fb923c; transform: translateY(-2px); }
+
+    /* ── SIDEBAR ── */
+    .article-sidebar {
+      position: sticky;
+      top: 88px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .sidebar-card {
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .sidebar-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--gray);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    /* TOC */
+    .toc-list { list-style: none; display: flex; flex-direction: column; gap: 0.1rem; }
+    .toc-list li a {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: var(--gray);
+      text-decoration: none;
+      font-size: 0.8rem;
+      padding: 0.4rem 0.5rem;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+      line-height: 1.35;
+    }
+    .toc-list li a:hover { color: var(--white); background: rgba(255,255,255,0.04); }
+    .toc-list li a.active { color: var(--orange); }
+    .toc-num { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--orange); flex-shrink: 0; opacity: 0.6; }
+
+    /* Related posts */
+    .related-post {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none;
+      color: inherit;
+      transition: opacity 0.2s;
+    }
+    .related-post:last-child { border-bottom: none; padding-bottom: 0; }
+    .related-post:hover { opacity: 0.75; }
+    .related-post-tag   { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; color: var(--orange); letter-spacing: 0.06em; text-transform: uppercase; }
+    .related-post-title { font-size: 0.82rem; font-weight: 600; line-height: 1.35; color: var(--white); }
+    .related-post-date  { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; color: var(--gray); }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--dark-2);
+    }
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: -0.01em;
+    }
+    .footer-logo .pkg   { color: var(--white); }
+    .footer-logo .probe { color: var(--orange); }
+    .footer-logo .io    { color: var(--blue-bright); }
+    .footer-links { display: flex; gap: 2rem; list-style: none; }
+    .footer-links a { color: var(--gray); text-decoration: none; font-size: 0.82rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--white); }
+    .footer-copy { font-size: 0.78rem; color: var(--gray); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1080px) {
+      .nav-center { display: none; }
+    }
+    @media (max-width: 720px) {
+      .nav-gh      { display: none; }
+      .nav-divider { display: none; }
+    }
+    @media (max-width: 900px) {
+      .article-wrapper { grid-template-columns: 1fr; gap: 3rem; padding-top: 6rem; }
+      .article-sidebar { position: static; }
+      .article-cta { flex-direction: column; align-items: flex-start; }
+      .policy-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 1.5rem; text-align: center; padding: 2rem; }
+      .footer-links { flex-wrap: wrap; justify-content: center; }
+    }
+    @media (max-width: 600px) {
+      nav { padding: 0 1.25rem; }
+      .article-wrapper { padding: 5rem 1.25rem 4rem; }
+      .article-title { font-size: 1.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo">
+    <img src="./img/pkgprobe_logo_notext.png" alt="pkgprobe logo" onerror="this.style.display='none'" />
+    <span class="nav-wordmark"><span class="pkg">pkg</span><span class="probe">probe</span><span class="io">.io</span></span>
+  </a>
+  <ul class="nav-center">
+    <li><a href="/#features">Features</a></li>
+    <li><a href="/#how">How it works</a></li>
+    <li><a href="/#usecases">Use cases</a></li>
+    <li><a href="/#install">Install</a></li>
+    <li><a href="/blog" class="active">Blog</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="https://github.com/Zeph3r/pkgprobe" target="_blank" class="nav-gh">GitHub</a>
+    <div class="nav-divider"></div>
+    <a href="https://app.pkgprobe.io" class="nav-app-btn">
+      <span class="live-dot"></span>
+      Launch App
+    </a>
+  </div>
+</nav>
+
+<!-- ARTICLE -->
+<div class="article-wrapper">
+
+  <!-- MAIN CONTENT -->
+  <main>
+
+    <header class="article-header">
+      <a href="/blog" class="back-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Blog
+      </a>
+
+      <div class="article-meta">
+        <span class="post-tag tag-green">DevOps</span>
+        <span class="post-tag tag-orange">Security</span>
+        <span class="article-date">Nov 14, 2024</span>
+        <span class="article-read-time">⏱ 9 min read</span>
+      </div>
+
+      <h1 class="article-title">Validating Installer Artifacts in CI/CD with pkgprobe's Python API</h1>
+
+      <p class="article-lead">Most CI/CD pipelines test code quality, unit tests, and container images — but almost none of them validate the installer artifact itself. If your pipeline produces <code>app.exe</code> or <code>app.msi</code> and you never analyze it before publishing, you're trusting the packaging layer blindly. Let's fix that.</p>
+    </header>
+
+    <!-- Hero terminal -->
+    <div class="article-hero-terminal">
+      <div class="t-bar">
+        <span class="t-dot td-red"></span>
+        <span class="t-dot td-yellow"></span>
+        <span class="t-dot td-green"></span>
+        <span class="t-bar-label">GitHub Actions — validate installer job</span>
+      </div>
+      <div class="t-body">
+        <div><span class="t-comment">  ✓  build complete → dist/MyAppSetup.exe</span></div>
+        <div>&nbsp;</div>
+        <div><span class="t-prompt">$</span> <span class="t-cmd">pkgprobe analyze dist/MyAppSetup.exe --json > result.json</span></div>
+        <div>&nbsp;</div>
+        <div class="t-section">// validation results</div>
+        <div><span class="t-key">  confidence     </span><span class="t-val">0.94 ✓</span></div>
+        <div><span class="t-key">  signature      </span><span class="t-val">SIGNED — Acme Corp (valid chain)</span></div>
+        <div><span class="t-key">  cve_matches    </span><span class="t-val">0 HIGH, 1 LOW</span></div>
+        <div><span class="t-key">  risk_score     </span><span class="t-val">0.12 ✓ below threshold</span></div>
+        <hr class="t-divider"/>
+        <div><span class="t-comment">  ✓  all checks passed — installer approved for deployment</span></div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <article class="article-body">
+
+      <h2 id="s1"><span class="h2-num">01</span> The Blind Spot in Your Pipeline</h2>
+      <p>In most organizations, the build-to-deploy flow looks like this: <strong>Build → Package → Upload to artifact repo → Deploy</strong>. At no point does anyone systematically inspect what's actually inside the installer before it ships.</p>
+      <p>The fields that go unchecked every release cycle:</p>
+      <ul>
+        <li>Silent install behavior and exit code validity</li>
+        <li>Embedded custom actions executing arbitrary code</li>
+        <li>Signature integrity and certificate chain state</li>
+        <li>CVE matches on bundled components</li>
+        <li>Suspicious network indicators baked in at packaging time</li>
+        <li>Framework detection confidence (do you know what packaged this?)</li>
+      </ul>
+      <p>Which means the first real security test of your installer happens in production — or worse, post-incident. That's backwards.</p>
+
+      <div class="callout callout-danger">
+        <div class="callout-icon">🚨</div>
+        <div class="callout-body">
+          <strong>The supply chain risk nobody talks about</strong>
+          <p>Installers are executable artifacts. A compromised or misconfigured installer reaching production endpoints can cause the same damage as a compromised dependency — but most pipelines have no gate for it.</p>
+        </div>
+      </div>
+
+      <h2 id="s2"><span class="h2-num">02</span> Shift Left: Treat Installers Like Code</h2>
+      <p>If you can unit test source files, you can validate installers. The principle is identical — define what "good" looks like, run the check automatically, fail the build if it doesn't pass.</p>
+      <p>pkgprobe exposes a Python API specifically for this. You can drop it directly into GitHub Actions, Azure DevOps, GitLab CI, Jenkins, or any self-hosted runner environment.</p>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="code-block-label">basic validation gate — Python</span>
+          <span class="code-block-lang">Python</span>
+        </div>
+        <pre><span class="c-kw">from</span> pkgprobe <span class="c-kw">import</span> <span class="c-fn">analyze_exe</span>
+
+plan = <span class="c-fn">analyze_exe</span>(<span class="c-str">"dist/MyAppSetup.exe"</span>)
+
+<span class="c-cm"># Fail if detection confidence is too low</span>
+<span class="c-kw">if</span> plan.confidence &lt; <span class="c-num">0.70</span>:
+    <span class="c-kw">raise</span> <span class="c-fn">Exception</span>(<span class="c-str">"Installer detection confidence too low"</span>)
+
+<span class="c-cm"># Fail on any high-severity CVE</span>
+<span class="c-kw">for</span> cve <span class="c-kw">in</span> plan.cve_matches:
+    <span class="c-kw">if</span> cve.severity == <span class="c-str">"HIGH"</span>:
+        <span class="c-kw">raise</span> <span class="c-fn">Exception</span>(<span class="c-str">f"High severity CVE: {cve.cve_id}"</span>)
+
+<span class="c-cm"># Fail if unsigned</span>
+<span class="c-kw">if</span> plan.signature_state != <span class="c-str">"SIGNED"</span>:
+    <span class="c-kw">raise</span> <span class="c-fn">Exception</span>(<span class="c-str">"Installer is not signed"</span>)
+
+<span class="c-fn">print</span>(<span class="c-str">"Installer validation passed."</span>)</pre>
+      </div>
+
+      <p>That's it. Now your installer has a security gate — the same way <code>pytest</code> gates your code. Simple, deterministic, automatable.</p>
+
+      <h2 id="s3"><span class="h2-num">03</span> GitHub Actions Integration</h2>
+      <p>Dropping pkgprobe into a GitHub Actions workflow is a single job addition. It runs on a Windows runner, installs the package, analyzes the artifact, and pipes results into your validation script.</p>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="code-block-label">.github/workflows/validate-installer.yml</span>
+          <span class="code-block-lang">YAML</span>
+        </div>
+        <pre><span class="c-key">name</span>: <span class="c-val">Validate Installer</span>
+
+<span class="c-key">on</span>: <span class="c-attr">[push, pull_request]</span>
+
+<span class="c-key">jobs</span>:
+  <span class="c-key">validate</span>:
+    <span class="c-key">runs-on</span>: <span class="c-val">windows-latest</span>
+
+    <span class="c-key">steps</span>:
+      - <span class="c-key">uses</span>: <span class="c-val">actions/checkout@v4</span>
+
+      - <span class="c-key">name</span>: <span class="c-val">Install pkgprobe</span>
+        <span class="c-key">run</span>: <span class="c-val">pip install pkgprobe</span>
+
+      - <span class="c-key">name</span>: <span class="c-val">Analyze Installer</span>
+        <span class="c-key">run</span>: <span class="c-val">|</span>
+          <span class="c-white">pkgprobe analyze dist/MyAppSetup.exe --json > result.json</span>
+
+      - <span class="c-key">name</span>: <span class="c-val">Validate Results</span>
+        <span class="c-key">run</span>: <span class="c-val">python scripts/validate_installer.py</span></pre>
+      </div>
+
+      <div class="callout callout-tip">
+        <div class="callout-icon">✅</div>
+        <div class="callout-body">
+          <strong>Works the same in Azure DevOps and GitLab CI</strong>
+          <p>The CLI and Python API are platform-agnostic. Swap the runner config, the steps are identical. The <code>--json</code> flag makes output trivially parseable in any language.</p>
+        </div>
+      </div>
+
+      <h2 id="s4"><span class="h2-num">04</span> What You Can Enforce</h2>
+      <p>You're not limited to CVE checks. pkgprobe lets you build policy around any dimension of installer analysis — and enforce it consistently across every build.</p>
+
+      <div class="policy-grid">
+        <div class="policy-card">
+          <div class="policy-card-title">🔏 Signature Enforcement</div>
+          <ul>
+            <li>Must be signed</li>
+            <li>Must match expected publisher</li>
+            <li>Certificate must not be expired</li>
+            <li>Chain must be intact</li>
+          </ul>
+        </div>
+        <div class="policy-card">
+          <div class="policy-card-title">📦 Framework Consistency</div>
+          <ul>
+            <li>Org standardizes on MSI only</li>
+            <li>Block EXE bootstrap installers</li>
+            <li>Enforce MSIX for modern app delivery</li>
+            <li>Flag unrecognized packaging frameworks</li>
+          </ul>
+        </div>
+        <div class="policy-card">
+          <div class="policy-card-title">⚙️ Custom Action Policy</div>
+          <ul>
+            <li>Flag PowerShell execution</li>
+            <li>Alert on Run key writes</li>
+            <li>Block external process launches</li>
+            <li>Catch encoded script payloads</li>
+          </ul>
+        </div>
+        <div class="policy-card">
+          <div class="policy-card-title">🔇 Silent Install Validation</div>
+          <ul>
+            <li>Validate recommended silent switch</li>
+            <li>Ensure no GUI triggers silently</li>
+            <li>Confirm proper exit codes</li>
+            <li>End "worked on my machine" deploys</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2 id="s5"><span class="h2-num">05</span> Advanced: Risk Scoring as a Gate</h2>
+      <p>Beyond individual checks, pkgprobe produces a composite risk score across all analysis dimensions. This lets you set a single quantitative threshold — and automatically block any installer that exceeds it.</p>
+
+      <div class="code-block">
+        <div class="code-block-header">
+          <span class="code-block-label">risk score threshold gate — Python</span>
+          <span class="code-block-lang">Python</span>
+        </div>
+        <pre><span class="c-kw">from</span> pkgprobe <span class="c-kw">import</span> <span class="c-fn">analyze_exe</span>
+<span class="c-kw">import</span> json, sys
+
+plan = <span class="c-fn">analyze_exe</span>(<span class="c-str">"dist/MyAppSetup.exe"</span>)
+
+<span class="c-cm"># Composite risk score gate</span>
+<span class="c-kw">if</span> plan.risk_score > <span class="c-num">0.65</span>:
+    <span class="c-fn">print</span>(<span class="c-str">f"✗ Risk score {plan.risk_score:.2f} exceeds threshold 0.65"</span>)
+    sys.<span class="c-fn">exit</span>(<span class="c-num">1</span>)
+
+<span class="c-cm"># Dump full report as build artifact</span>
+<span class="c-kw">with</span> <span class="c-fn">open</span>(<span class="c-str">"installer-report.json"</span>, <span class="c-str">"w"</span>) <span class="c-kw">as</span> f:
+    json.<span class="c-fn">dump</span>(plan.<span class="c-fn">to_dict</span>(), f, indent=<span class="c-num">2</span>)
+
+<span class="c-fn">print</span>(<span class="c-str">f"✓ Risk score {plan.risk_score:.2f} — installer approved"</span>)</pre>
+      </div>
+
+      <p>Security becomes <strong>measurable and auditable</strong>. Every build produces a JSON report you can attach as a build artifact — giving you a full audit trail of every installer that shipped.</p>
+
+      <h2 id="s6"><span class="h2-num">06</span> The New Deployment Flow</h2>
+      <p>Here's what the shift looks like end to end — from the old manual process to a fully gated automated pipeline:</p>
+
+      <div class="flow-diagram">
+        <div class="flow-diagram-label">// before vs. after</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#f87171;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:1rem;">✗ before</div>
+            <div class="flow-steps">
+              <div class="flow-step">
+                <div class="flow-step-connector"><div class="flow-step-dot"></div><div class="flow-step-line"></div></div>
+                <div class="flow-step-content"><div class="flow-step-title">Vendor drops installer</div></div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-step-connector"><div class="flow-step-dot"></div><div class="flow-step-line"></div></div>
+                <div class="flow-step-content"><div class="flow-step-title">Packaging team tests manually</div><div class="flow-step-desc">Hours of trial and error</div></div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-step-connector"><div class="flow-step-dot"></div></div>
+                <div class="flow-step-content"><div class="flow-step-title">Deployment</div><div class="flow-step-desc">Vulnerabilities discovered in prod</div></div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#86efac;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:1rem;">✓ after</div>
+            <div class="flow-steps">
+              <div class="flow-step">
+                <div class="flow-step-connector"><div class="flow-step-dot active"></div><div class="flow-step-line"></div></div>
+                <div class="flow-step-content"><div class="flow-step-title">Vendor drops installer</div></div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-step-connector"><div class="flow-step-dot active"></div><div class="flow-step-line"></div></div>
+                <div class="flow-step-content">
+                  <div class="flow-step-title">pkgprobe automated validation</div>
+                  <span class="flow-step-badge badge-blue">CI gate</span>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-step-connector"><div class="flow-step-dot active"></div><div class="flow-step-line"></div></div>
+                <div class="flow-step-content">
+                  <div class="flow-step-title">Risk scoring</div>
+                  <span class="flow-step-badge badge-orange">quantified</span>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-step-connector"><div class="flow-step-dot active"></div><div class="flow-step-line"></div></div>
+                <div class="flow-step-content">
+                  <div class="flow-step-title">Approve or block</div>
+                  <div class="flow-step-desc">Automated, policy-driven</div>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-step-connector"><div class="flow-step-dot active"></div></div>
+                <div class="flow-step-content">
+                  <div class="flow-step-title">Deployment</div>
+                  <span class="flow-step-badge badge-green">clean &amp; audited</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 id="s7"><span class="h2-num">07</span> Why This Matters in Regulated Environments</h2>
+      <p>In healthcare, finance, government, and critical infrastructure, installer integrity isn't just a security concern — it's an audit requirement. If an auditor asks <em>"how do you validate third-party deployment packages before release?"</em>, you want a better answer than "manually."</p>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">📋</div>
+        <div class="callout-body">
+          <strong>The mature posture answer</strong>
+          <p>"We run automated installer intelligence validation in CI — signature verification, CVE matching, and risk scoring — with every build producing a signed audit report." That's a defensible answer to any compliance question about software supply chain integrity.</p>
+        </div>
+      </div>
+
+      <p>Automated installer validation also directly addresses requirements that appear in frameworks like NIST SP 800-161 (supply chain risk management) and the CISA Secure by Design guidance — areas where most orgs currently have no tooling at all.</p>
+
+      <!-- Conclusion -->
+      <div class="article-conclusion">
+        <div class="conclusion-label">// final thought</div>
+        <blockquote>Installers are executable supply chain artifacts. If you wouldn't deploy unsigned code, why deploy unanalyzed installers?</blockquote>
+        <p>CI/CD isn't complete until the packaging layer is validated. pkgprobe makes that validation measurable, automatable, and auditable — in the same pipeline where everything else already lives.</p>
+      </div>
+
+      <!-- CTA -->
+      <div class="article-cta">
+        <div class="article-cta-text">
+          <h3>Add installer validation to your pipeline today</h3>
+          <p>Install pkgprobe via pip, wire it into your CI workflow, and ship with a security gate on every installer artifact you produce.</p>
+        </div>
+        <a href="https://pypi.org/project/pkgprobe" class="btn-primary">pip install pkgprobe →</a>
+      </div>
+
+    </article>
+  </main>
+
+  <!-- SIDEBAR -->
+  <aside class="article-sidebar">
+
+    <!-- TOC -->
+    <div class="sidebar-card">
+      <div class="sidebar-label">// in this article</div>
+      <ul class="toc-list">
+        <li><a href="#s1"><span class="toc-num">01</span> The Blind Spot in Your Pipeline</a></li>
+        <li><a href="#s2"><span class="toc-num">02</span> Shift Left: Treat Installers Like Code</a></li>
+        <li><a href="#s3"><span class="toc-num">03</span> GitHub Actions Integration</a></li>
+        <li><a href="#s4"><span class="toc-num">04</span> What You Can Enforce</a></li>
+        <li><a href="#s5"><span class="toc-num">05</span> Advanced: Risk Scoring as a Gate</a></li>
+        <li><a href="#s6"><span class="toc-num">06</span> The New Deployment Flow</a></li>
+        <li><a href="#s7"><span class="toc-num">07</span> Regulated Environments</a></li>
+      </ul>
+    </div>
+
+    <!-- Related posts -->
+    <div class="sidebar-card">
+      <div class="sidebar-label">// related posts</div>
+
+      <a href="/blog/msi-metadata-deep-dive" class="related-post">
+        <span class="related-post-tag">🔍 Security</span>
+        <span class="related-post-title">What MSI Metadata Actually Tells You About an Installer's Risk</span>
+        <span class="related-post-date">Jan 28, 2025</span>
+      </a>
+
+      <a href="/blog/cve-matching-workflow" class="related-post">
+        <span class="related-post-tag">🛡️ Security</span>
+        <span class="related-post-title">Integrating pkgprobe into a Vulnerability Management Workflow</span>
+        <span class="related-post-date">Jan 08, 2025</span>
+      </a>
+
+      <a href="/blog/silent-install-switches" class="related-post">
+        <span class="related-post-tag">⚙️ Deployment</span>
+        <span class="related-post-title">Silent Install Switches: Stop Guessing, Start Probing</span>
+        <span class="related-post-date">Jan 15, 2025</span>
+      </a>
+
+      <a href="/blog/open-source-installer-dataset" class="related-post">
+        <span class="related-post-tag">📦 Open Source</span>
+        <span class="related-post-title">Why We're Building an Open Installer Intelligence Dataset</span>
+        <span class="related-post-date">Nov 28, 2024</span>
+      </a>
+    </div>
+
+    <!-- Share -->
+    <div class="sidebar-card">
+      <div class="sidebar-label">// share this post</div>
+      <div style="display:flex;flex-direction:column;gap:0.6rem;">
+        <a href="https://twitter.com/intent/tweet?text=Validating+Installer+Artifacts+in+CI%2FCD+with+pkgprobe&url=https://pkgprobe.io/blog/cicd-pipeline-integration" target="_blank" style="display:inline-flex;align-items:center;gap:0.6rem;color:var(--gray);text-decoration:none;font-size:0.82rem;padding:0.5rem 0.75rem;background:var(--dark-3);border:1px solid var(--border);border-radius:7px;transition:border-color 0.2s,color 0.2s;" onmouseover="this.style.color='var(--white)';this.style.borderColor='rgba(255,255,255,0.15)'" onmouseout="this.style.color='var(--gray)';this.style.borderColor='var(--border)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.63L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"/></svg>
+          Share on X
+        </a>
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://pkgprobe.io/blog/cicd-pipeline-integration" target="_blank" style="display:inline-flex;align-items:center;gap:0.6rem;color:var(--gray);text-decoration:none;font-size:0.82rem;padding:0.5rem 0.75rem;background:var(--dark-3);border:1px solid var(--border);border-radius:7px;transition:border-color 0.2s,color 0.2s;" onmouseover="this.style.color='var(--white)';this.style.borderColor='rgba(255,255,255,0.15)'" onmouseout="this.style.color='var(--gray)';this.style.borderColor='var(--border)'">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+          Share on LinkedIn
+        </a>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <a href="/" class="footer-logo">
+    <img src="./img/pkgprobe_logo_notext.png" alt="pkgprobe logo" onerror="this.style.display='none'" style="height:40px;width:auto;object-fit:contain;" />
+    <span class="nav-wordmark"><span class="pkg">pkg</span><span class="probe">probe</span><span class="io">.io</span></span>
+  </a>
+  <ul class="footer-links">
+    <li><a href="https://github.com/Zeph3r/pkgprobe" target="_blank">GitHub</a></li>
+    <li><a href="https://pypi.org/project/pkgprobe" target="_blank">PyPI</a></li>
+    <li><a href="/blog">Blog</a></li>
+    <li><a href="#">Docs</a></li>
+    <li><a href="#">Changelog</a></li>
+  </ul>
+  <div class="footer-copy">© 2025 pkgprobe.io — Open Source</div>
+</footer>
+
+<script>
+  // Active TOC tracking
+  const headings = document.querySelectorAll('h2[id]');
+  const tocLinks = document.querySelectorAll('.toc-list a');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocLinks.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.toc-list a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  headings.forEach(h => observer.observe(h));
+</script>
+
+</body>
+</html>
