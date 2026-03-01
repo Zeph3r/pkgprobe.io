@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,6 +38,9 @@
 
     html { scroll-behavior: smooth; }
 
+    /* Offset anchor scroll targets so fixed nav doesn't cover them */
+    [id] { scroll-margin-top: 72px; }
+
     body {
       background: var(--dark);
       color: var(--white);
@@ -65,11 +69,12 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 4rem;
+      padding: 0 2.5rem;
       height: 64px;
       background: rgba(8,10,14,0.85);
       backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
+      gap: 1rem;
     }
 
     .nav-logo {
@@ -81,6 +86,7 @@
       font-weight: 800;
       font-size: 1.15rem;
       letter-spacing: -0.01em;
+      flex-shrink: 0;
     }
     .nav-logo img {
       height: 52px;
@@ -92,32 +98,121 @@
     .nav-logo .io { color: var(--blue-bright); font-size: 0.9rem; }
     .nav-wordmark { display: inline-flex; align-items: baseline; }
 
-    .nav-links {
+    /* Center nav links — flex, not absolute, so it can't collide */
+    .nav-center {
       display: flex;
-      gap: 2.5rem;
+      align-items: center;
+      gap: 0;
       list-style: none;
+      flex: 1;
+      justify-content: center;
+      min-width: 0;
     }
-    .nav-links a {
+    .nav-center li a {
       color: var(--gray);
       text-decoration: none;
-      font-size: 0.875rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      display: block;
+      white-space: nowrap;
+    }
+    .nav-center li a:hover { color: var(--white); }
+
+    /* Right side nav actions */
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    /* GitHub link — subtle */
+    .nav-gh {
+      color: var(--gray) !important;
+      text-decoration: none;
+      font-size: 0.78rem;
       font-weight: 600;
       letter-spacing: 0.05em;
       text-transform: uppercase;
       transition: color 0.2s;
-    }
-    .nav-links a:hover { color: var(--white); }
-
-    .nav-cta {
-      background: var(--orange);
-      color: #000 !important;
-      padding: 0.45rem 1.1rem;
+      padding: 0.35rem 0.6rem;
       border-radius: 6px;
-      font-weight: 700 !important;
-      letter-spacing: 0.04em !important;
-      transition: background 0.2s !important;
+      white-space: nowrap;
     }
-    .nav-cta:hover { background: #fb923c !important; color: #000 !important; }
+    .nav-gh:hover { color: var(--white) !important; }
+
+    /* Divider */
+    .nav-divider {
+      width: 1px;
+      height: 22px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    /* Launch App button — the hero CTA of the nav */
+    .nav-app-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: linear-gradient(135deg, rgba(249,115,22,0.15) 0%, rgba(59,130,246,0.15) 100%);
+      border: 1px solid rgba(249,115,22,0.4);
+      color: var(--white) !important;
+      text-decoration: none;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.45rem 1rem;
+      border-radius: 7px;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
+    }
+    .nav-app-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(249,115,22,0.08) 0%, rgba(59,130,246,0.08) 100%);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .nav-app-btn:hover {
+      border-color: rgba(249,115,22,0.7);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(249,115,22,0.2), 0 0 0 1px rgba(249,115,22,0.1);
+    }
+    .nav-app-btn:hover::before { opacity: 1; }
+
+    /* Small pulsing dot indicator */
+    .nav-app-btn .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 0 rgba(34,197,94,0.6);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
+      50%       { box-shadow: 0 0 0 4px rgba(34,197,94,0); }
+    }
+
+    .nav-app-btn .arrow-icon {
+      font-size: 0.7rem;
+      opacity: 0.7;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    .nav-app-btn:hover .arrow-icon {
+      transform: translate(2px, -2px);
+      opacity: 1;
+    }
 
     /* ── HERO ── */
     .hero {
@@ -540,6 +635,61 @@
       line-height: 1.9;
     }
 
+    /* ── BLOG ── */
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 4rem;
+    }
+    .blog-card {
+      background: var(--dark-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .blog-card:hover {
+      border-color: rgba(249,115,22,0.35);
+      transform: translateY(-3px);
+    }
+    .blog-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--orange);
+      background: rgba(249,115,22,0.08);
+      border: 1px solid rgba(249,115,22,0.2);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      display: inline-block;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      width: fit-content;
+    }
+    .blog-title {
+      font-size: 0.975rem;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.4;
+    }
+    .blog-desc {
+      font-size: 0.845rem;
+      color: var(--gray);
+      line-height: 1.65;
+      font-weight: 400;
+      flex: 1;
+    }
+    .blog-read {
+      font-size: 0.8rem;
+      color: var(--blue-bright);
+      font-weight: 600;
+      margin-top: 0.25rem;
+    }
+
     /* ── CTA ── */
     .cta-section {
       position: relative;
@@ -603,7 +753,6 @@
       font-size: 1.15rem;
       letter-spacing: -0.01em;
     }
-    /*.footer-logo { font-weight: 800; font-size: 1rem; }*/
     .footer-logo .pkg { color: var(--white); }
     .footer-logo .probe { color: var(--orange); }
     .footer-logo .io { color: var(--blue-bright); }
@@ -628,10 +777,26 @@
     }
 
     /* ── RESPONSIVE ── */
+
+    /* ~1200px: tighten padding slightly */
+    @media (max-width: 1200px) {
+      nav { padding: 0 1.75rem; }
+      .nav-center li a { padding: 0.35rem 0.5rem; font-size: 0.74rem; }
+    }
+
+    /* ~1050px: hide Blog from center (it's less critical), tighten further */
+    @media (max-width: 1050px) {
+      .nav-center li a { padding: 0.35rem 0.4rem; letter-spacing: 0.02em; }
+      .nav-gh { display: none; }
+      .nav-divider { display: none; }
+    }
+
+    /* ~900px: hide all center links, keep just logo + Launch App */
     @media (max-width: 900px) {
-      nav { padding: 0 1.5rem; }
-      .nav-links { display: none; }
+      nav { padding: 0 1.25rem; }
+      .nav-center { display: none; }
       .features-grid { grid-template-columns: 1fr; }
+      .blog-grid { grid-template-columns: 1fr; }
       .steps { grid-template-columns: 1fr 1fr; }
       .steps::before { display: none; }
       .usecases-grid { grid-template-columns: 1fr; }
@@ -641,20 +806,43 @@
       footer { flex-direction: column; gap: 1.5rem; text-align: center; padding: 2rem; }
       .footer-links { flex-wrap: wrap; justify-content: center; }
     }
+
+    /* ~480px: shrink Launch App button text */
+    @media (max-width: 480px) {
+      .nav-app-btn { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
+      .nav-app-btn .arrow-icon { display: none; }
+      nav { padding: 0 1rem; }
+    }
   </style>
 </head>
 <body>
 
 <!-- NAV -->
 <nav>
-  <a href="#" class="nav-logo"><img src="./img/pkgprobe_logo_notext.png" alt="pkgprobe logo" onerror="this.style.display='none'" /><span class="nav-wordmark"><span class="pkg">pkg</span><span class="probe">probe</span><span class="io">.io</span></span></a>
-  <ul class="nav-links">
+  <a href="#" class="nav-logo">
+    <img src="./img/pkgprobe_logo_notext.png" alt="pkgprobe logo" onerror="this.style.display='none'" />
+    <span class="nav-wordmark"><span class="pkg">pkg</span><span class="probe">probe</span><span class="io">.io</span></span>
+  </a>
+
+  <!-- Center nav links -->
+  <ul class="nav-center">
     <li><a href="#features">Features</a></li>
     <li><a href="#how">How It Works</a></li>
     <li><a href="#usecases">Use Cases</a></li>
     <li><a href="#install">Install</a></li>
-    <li><a href="https://github.com/Zeph3r/pkgprobe" target="_blank" class="nav-cta">GitHub ↗</a></li>
+    <li><a href="./blog/">Blog</a></li>
   </ul>
+
+  <!-- Right side actions -->
+  <div class="nav-right">
+    <a href="https://github.com/Zeph3r/pkgprobe" target="_blank" class="nav-gh">GitHub ↗</a>
+    <div class="nav-divider"></div>
+    <a href="https://app.pkgprobe.io" target="_blank" class="nav-app-btn">
+      <span class="live-dot"></span>
+      Launch App
+      <span class="arrow-icon">↗</span>
+    </a>
+  </div>
 </nav>
 
 <!-- HERO -->
@@ -861,6 +1049,67 @@
   </div>
 </section>
 
+<!-- BLOG -->
+<section class="section" id="blog">
+  <div class="section-label">// blog</div>
+  <h2 class="section-title">From the pkgprobe team.</h2>
+  <div class="blog-grid">
+
+    <a href="./blog/msi-metadata-deep-dive/" class="blog-card">
+      <div class="blog-tag">Deep Dive</div>
+      <div class="blog-title">MSI Metadata: What's Really Inside a Windows Installer</div>
+      <div class="blog-desc">A technical breakdown of the MSI database format, property tables, and what metadata gets written where during installation.</div>
+      <div class="blog-read">Read article →</div>
+    </a>
+
+    <a href="./blog/silent-install-switches/" class="blog-card">
+      <div class="blog-tag">Deployment</div>
+      <div class="blog-title">Silent Install Switches: The Complete Reference</div>
+      <div class="blog-desc">Every common silent install flag across MSI, NSIS, Inno Setup, and InstallShield — and how pkgprobe extracts them automatically.</div>
+      <div class="blog-read">Read article →</div>
+    </a>
+
+    <a href="./blog/registry-impact-analysis/" class="blog-card">
+      <div class="blog-tag">Security</div>
+      <div class="blog-title">Registry Impact Analysis Before You Deploy</div>
+      <div class="blog-desc">How to predict and audit every registry key an installer will touch — without running it on a live machine.</div>
+      <div class="blog-read">Read article →</div>
+    </a>
+
+    <a href="./blog/cve-matching-workflow/" class="blog-card">
+      <div class="blog-tag">Vulnerability Mgmt</div>
+      <div class="blog-title">CVE Matching Workflow for Enterprise Software</div>
+      <div class="blog-desc">How pkgprobe cross-references installer metadata against NVD and OSV databases to surface known vulnerabilities before deployment.</div>
+      <div class="blog-read">Read article →</div>
+    </a>
+
+    <a href="./blog/msix-vs-msi/" class="blog-card">
+      <div class="blog-tag">Formats</div>
+      <div class="blog-title">MSIX vs MSI: Which Should You Care About?</div>
+      <div class="blog-desc">A practical comparison of modern MSIX packaging against the legacy MSI format — and what each means for your deployment pipeline.</div>
+      <div class="blog-read">Read article →</div>
+    </a>
+
+    <a href="./blog/cicd-pipeline-integration/" class="blog-card">
+      <div class="blog-tag">DevOps</div>
+      <div class="blog-title">Integrating pkgprobe into Your CI/CD Pipeline</div>
+      <div class="blog-desc">Step-by-step guide to running installer analysis as a gate in GitHub Actions, Azure Pipelines, and Jenkins before artifacts reach prod.</div>
+      <div class="blog-read">Read article →</div>
+    </a>
+
+    <a href="./blog/open-source-installer-dataset/" class="blog-card">
+      <div class="blog-tag">Community</div>
+      <div class="blog-title">Building an Open-Source Windows Installer Dataset</div>
+      <div class="blog-desc">Why we're building a community-powered dataset of installer metadata and how every pkgprobe scan makes the tool smarter for everyone.</div>
+      <div class="blog-read">Read article →</div>
+    </a>
+
+  </div>
+  <div style="text-align:center; margin-top:3rem;">
+    <a href="./blog/" class="btn-secondary">View all posts →</a>
+  </div>
+</section>
+
 <!-- CTA -->
 <section class="cta-section">
   <h2>Deploy smarter.<br /><span style="color:var(--orange);">Start probing.</span></h2>
@@ -873,12 +1122,14 @@
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo">
-    <span class="pkg">pkg</span><span class="probe">probe</span><span class="io">.io</span>
-  </div>
+  <a href="#" class="footer-logo">
+    <img src="./img/pkgprobe_logo_notext.png" alt="pkgprobe logo" onerror="this.style.display='none'" style="height:40px;width:auto;object-fit:contain;" />
+    <span class="nav-wordmark"><span class="pkg">pkg</span><span class="probe">probe</span><span class="io">.io</span></span>
+  </a>
   <ul class="footer-links">
     <li><a href="https://github.com/Zeph3r/pkgprobe" target="_blank">GitHub</a></li>
     <li><a href="https://pypi.org/project/pkgprobe" target="_blank">PyPI</a></li>
+    <li><a href="./blog/">Blog</a></li>
     <li><a href="#">Docs</a></li>
     <li><a href="#">Changelog</a></li>
   </ul>
