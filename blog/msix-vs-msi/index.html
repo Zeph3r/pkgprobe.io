@@ -163,6 +163,24 @@
     .article-date      { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;  color: var(--gray); }
     .article-read-time { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--gray); }
 
+    .article-author {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: #cbd5e1;
+      letter-spacing: 0.03em;
+      margin-bottom: 1.5rem;
+    }
+    .article-author::before {
+      content: '';
+      width: 24px;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(249,115,22,0.7), rgba(96,165,250,0.4));
+      opacity: 0.9;
+    }
+
     .article-title {
       font-size: clamp(1.9rem, 4vw, 2.9rem); font-weight: 800;
       letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1.25rem;
@@ -564,6 +582,7 @@
         <span class="article-date">Dec 22, 2024</span>
         <span class="article-read-time">⏱ 10 min read</span>
       </div>
+      <div class="article-author">By Tijan McClain</div>
       <h1 class="article-title">MSIX vs MSI vs EXE: What Each Format Reveals (and Hides)</h1>
       <p class="article-lead">Most teams categorize installers as MSI = enterprise, MSIX = modern, EXE = legacy. That's oversimplified. Each format exposes different intelligence and hides different risk. If you're deploying software at scale, you need to understand what you're actually looking at.</p>
     </header>

@@ -396,6 +396,23 @@
       color: var(--gray);
     }
 
+    .post-author {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: #cbd5e1;
+      letter-spacing: 0.03em;
+    }
+    .post-author::before {
+      content: '';
+      width: 18px;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(249,115,22,0.65), rgba(96,165,250,0.35));
+      opacity: 0.9;
+    }
+
     .featured-title {
       font-size: 1.65rem;
       font-weight: 800;
@@ -486,6 +503,10 @@
       font-weight: 400;
       line-height: 1.65;
       flex: 1;
+    }
+
+    .post-card-author {
+      margin-top: -0.15rem;
     }
 
     .post-card-footer {
@@ -704,6 +725,7 @@
         <span class="post-tag tag-blue">Analysis</span>
         <span class="post-date">Jan 28, 2025</span>
       </div>
+      <div class="post-author">By Tijan McClain</div>
       <div class="featured-title">What MSI Metadata Actually Tells You About an Installer's Risk</div>
       <div class="featured-excerpt">Most teams deploy MSIs without looking past the filename. We break down every metadata field pkgprobe extracts — from publisher certificates to embedded network telemetry — and show exactly what a malicious or misconfigured installer looks like before it touches your endpoints.</div>
       <div style="display:flex;align-items:center;gap:1rem;margin-top:0.5rem;">
@@ -726,6 +748,7 @@
         <span class="post-date">Jan 15, 2025</span>
       </div>
       <div class="post-card-title">Silent Install Switches: Stop Guessing, Start Probing</div>
+      <div class="post-card-author post-author">By Tijan McClain</div>
       <div class="post-card-excerpt">A practical breakdown of how pkgprobe auto-extracts /quiet, /norestart, and TRANSFORMS flags from MSIs — and why SCCM admins should never manually hunt for them again.</div>
       <div class="post-card-footer">
         <span class="post-tag tag-blue" style="font-size:0.65rem;">SCCM / Intune</span>
@@ -740,6 +763,7 @@
         <span class="post-date">Jan 08, 2025</span>
       </div>
       <div class="post-card-title">Integrating pkgprobe into a Vulnerability Management Workflow</div>
+      <div class="post-card-author post-author">By Tijan McClain</div>
       <div class="post-card-excerpt">How to wire pkgprobe's CVE output into Tenable or Rapid7 ticket workflows — so vulnerable software is flagged before it's approved for deployment.</div>
       <div class="post-card-footer">
         <span class="post-tag tag-orange" style="font-size:0.65rem;">CVE Intel</span>
@@ -754,6 +778,7 @@
         <span class="post-date">Dec 22, 2024</span>
       </div>
       <div class="post-card-title">MSIX vs MSI vs EXE: What Each Format Reveals (and Hides)</div>
+      <div class="post-card-author post-author">By Tijan McClain</div>
       <div class="post-card-excerpt">A technical comparison of what pkgprobe can extract from each installer format — and why MSIX's containerized model changes the analysis game entirely.</div>
       <div class="post-card-footer">
         <span class="post-tag tag-green" style="font-size:0.65rem;">Deep Dive</span>
@@ -768,6 +793,7 @@
         <span class="post-date">Dec 10, 2024</span>
       </div>
       <div class="post-card-title">Auditing Registry Writes Before Deployment with pkgprobe</div>
+      <div class="post-card-author post-author">By Tijan McClain</div>
       <div class="post-card-excerpt">Every MSI leaves a registry footprint. Here's how to use pkgprobe to capture that footprint in advance and build change control documentation automatically.</div>
       <div class="post-card-footer">
         <span class="post-tag tag-purple" style="font-size:0.65rem;">Registry</span>
@@ -782,6 +808,7 @@
         <span class="post-date">Nov 28, 2024</span>
       </div>
       <div class="post-card-title">Why We're Building an Open Installer Intelligence Dataset</div>
+      <div class="post-card-author post-author">By Tijan McClain</div>
       <div class="post-card-excerpt">The vision behind pkgprobe's community data moat — and why a shared, open corpus of installer analysis data benefits every IT and security team on the planet.</div>
       <div class="post-card-footer">
         <span class="post-tag tag-blue" style="font-size:0.65rem;">Community</span>
@@ -796,6 +823,7 @@
         <span class="post-date">Nov 14, 2024</span>
       </div>
       <div class="post-card-title">Validating Installer Artifacts in CI/CD with pkgprobe's Python API</div>
+      <div class="post-card-author post-author">By Tijan McClain</div>
       <div class="post-card-excerpt">A step-by-step guide to dropping pkgprobe into a GitHub Actions or Azure DevOps pipeline to gate installer artifacts on signature validity and CVE score.</div>
       <div class="post-card-footer">
         <span class="post-tag tag-green" style="font-size:0.65rem;">GitHub Actions</span>
