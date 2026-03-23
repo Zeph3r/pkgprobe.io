@@ -251,6 +251,24 @@
       color: var(--gray);
     }
 
+    .article-author {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: #cbd5e1;
+      letter-spacing: 0.03em;
+      margin-bottom: 1.5rem;
+    }
+    .article-author::before {
+      content: '';
+      width: 24px;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(249,115,22,0.7), rgba(96,165,250,0.4));
+      opacity: 0.9;
+    }
+
     .article-title {
       font-size: clamp(1.9rem, 4vw, 2.9rem);
       font-weight: 800;
@@ -783,6 +801,7 @@
         <span class="article-read-time">⏱ 8 min read</span>
       </div>
 
+      <div class="article-author">By Tijan McClain</div>
       <h1 class="article-title">What MSI Metadata Actually Tells You About an Installer's Risk</h1>
 
       <p class="article-lead">Most teams deploy MSIs without looking past the filename. <code>AcrobatReader2025.msi</code> — looks official, ship it. But an MSI is a structured database, and inside that database is operational, identity, and security-relevant intelligence that tells you far more than the filename ever will. pkgprobe extracts that metadata automatically — and more importantly, helps you interpret it.</p>
