@@ -181,6 +181,7 @@
     .hero h1 { font-family:'Syne',sans-serif; font-size:clamp(2.6rem,6vw,4.8rem); font-weight:800; letter-spacing:-0.04em; line-height:1.0; max-width:860px; animation:fadeUp 0.5s ease 0.1s both; }
     .accent-orange { color:var(--orange); } .accent-blue { color:var(--blue-bright); }
     .hero-sub { margin-top:1.25rem; color:var(--white); font-size:clamp(0.95rem,1.8vw,1.05rem); font-weight:500; max-width:600px; line-height:1.7; animation:fadeUp 0.5s ease 0.2s both; }
+    .hero-cycle-line { white-space:nowrap; }
 
     .hero-actions { display:flex; gap:1rem; margin-top:1.5rem; flex-wrap:wrap; justify-content:center; animation:fadeUp 0.5s ease 0.35s both; }
     .btn-primary { display:inline-flex; align-items:center; gap:0.5rem; background:var(--orange); color:#000; font-family:'Syne',sans-serif; font-weight:700; font-size:0.88rem; padding:0.75rem 1.75rem; border-radius:8px; text-decoration:none; transition:background 0.2s,transform 0.15s,box-shadow 0.2s; }
@@ -355,6 +356,16 @@
       footer{flex-direction:column;gap:1.25rem;text-align:center;padding:2rem}
       .f-links{flex-wrap:wrap;justify-content:center}
     }
+    @media (max-width:600px) {
+      .hero { padding:7.25rem 1rem 4rem; min-height:auto; }
+      .hero h1 { font-size:clamp(2.1rem,12vw,3.25rem); line-height:0.96; max-width:100%; }
+      .hero-sub { max-width:34ch; font-size:1rem; line-height:1.5; }
+      .hero-badge { width:min(100%, 360px); justify-content:center; white-space:normal; line-height:1.4; padding:0.45rem 0.9rem; }
+      .hero-actions { width:100%; gap:0.75rem; }
+      .hero-actions .btn-primary,
+      .hero-actions .btn-secondary { width:min(100%, 330px); justify-content:center; }
+      .hero-cycle-line { white-space:normal; display:inline; }
+    }
   </style>
 </head>
 <body>
@@ -391,7 +402,7 @@
   <div class="hero-badge"><span class="dot"></span>Early access open · pkgprobe-trace beta</div>
   <h1>
     <span class="glitch-wrap" data-text="Stop Guessing">Stop Guessing</span><br />
-    <span style="white-space:nowrap;"><span class="accent-orange glitch-wrap" data-text="Installer" id="cycle-word">Installer</span><span class="accent-blue" id="cycle-word2"> Flags.</span><span class="cycle-cursor accent-blue">|</span></span><br />
+    <span class="hero-cycle-line"><span class="accent-orange glitch-wrap" data-text="Installer" id="cycle-word">Installer</span><span class="accent-blue" id="cycle-word2"> Flags.</span><span class="cycle-cursor accent-blue">|</span></span><br />
     <span class="glitch-wrap" data-text="Deploy with Confidence.">Deploy with Confidence.</span>
   </h1>
 
