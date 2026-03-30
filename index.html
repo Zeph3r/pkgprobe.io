@@ -359,6 +359,13 @@
     @media (max-width:600px) {
       .hero { padding:7.25rem 1rem 4rem; min-height:auto; }
       .hero h1 { font-size:clamp(2.1rem,12vw,3.25rem); line-height:0.96; max-width:100%; }
+      .hero-deploy-line {
+        display:block;
+        font-size:0.88em;
+        line-height:1.02;
+        word-break:break-word;
+        overflow-wrap:anywhere;
+      }
       .hero-sub { max-width:34ch; font-size:1rem; line-height:1.5; }
       .hero-badge { width:min(100%, 360px); justify-content:center; white-space:normal; line-height:1.4; padding:0.45rem 0.9rem; }
       .hero-actions { width:100%; gap:0.75rem; }
@@ -403,7 +410,7 @@
   <h1>
     <span class="glitch-wrap" data-text="Stop Guessing">Stop Guessing</span><br />
     <span class="hero-cycle-line"><span class="accent-orange glitch-wrap" data-text="Installer" id="cycle-word">Installer</span><span class="accent-blue" id="cycle-word2"> Flags.</span><span class="cycle-cursor accent-blue">|</span></span><br />
-    <span class="glitch-wrap" data-text="Deploy with Confidence.">Deploy with Confidence.</span>
+    <span class="glitch-wrap hero-deploy-line" data-text="Deploy with Confidence.">Deploy with Confidence.</span>
   </h1>
 
   <p class="hero-sub">Automatically generate working silent install commands and Intune-ready packages — in minutes, not hours of guesswork.</p>
