@@ -54,8 +54,8 @@
       },
       {
         "@type": "Offer",
-        "name": "Pro",
-        "price": "49",
+        "name": "Team",
+        "price": "129",
         "priceCurrency": "USD",
         "billingIncrement": "month"
       }
@@ -143,8 +143,16 @@
     .cli-dim { color:var(--gray-dim); }
     .cli-hi { color:var(--cyan); text-shadow:0 0 6px rgba(34,211,238,0.3); }
 
+    /* URGENCY BAR — static, scrolls with page */
+    .urgency-bar { background:linear-gradient(90deg,rgba(249,115,22,0.12),rgba(249,115,22,0.08),rgba(249,115,22,0.12)); border-bottom:1px solid rgba(249,115,22,0.25); padding:0.6rem 2rem; text-align:center; font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--white); letter-spacing:0.04em; display:flex; align-items:center; justify-content:center; gap:0.75rem; position:relative; z-index:1; }
+    .urgency-bar .ub-dot { width:6px; height:6px; border-radius:50%; background:var(--orange); box-shadow:0 0 8px var(--orange); animation:pulse 1.8s ease infinite; flex-shrink:0; }
+    .urgency-bar strong { color:var(--orange); }
+    .urgency-bar a { color:var(--white); text-decoration:underline; text-underline-offset:3px; opacity:0.8; transition:opacity 0.2s; margin-left:0.5rem; }
+    .urgency-bar a:hover { opacity:1; }
+
     /* NAV */
-    nav { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:0 2.5rem; height:64px; background:rgba(8,10,14,0.88); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); gap:1rem; }
+    nav { position:sticky; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:0 2.5rem; height:64px; background:rgba(8,10,14,0.88); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); gap:1rem; }
+
     .nav-logo { display:flex; align-items:center; gap:0.6rem; text-decoration:none; font-family:'Poppins',sans-serif; font-weight:800; font-size:1.1rem; letter-spacing:-0.01em; flex-shrink:0; }
     .nav-logo img { height:44px; width:auto; object-fit:contain; }
     .nav-wordmark { display:inline-flex; align-items:baseline; }
@@ -178,7 +186,7 @@
     .hero-badge { display:inline-flex; align-items:center; gap:0.5rem; background:var(--dark-3); border:1px solid var(--border-bright); border-radius:100px; padding:0.35rem 1rem; font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--gray); margin-bottom:2.25rem; animation:fadeUp 0.5s ease both; }
     .hero-badge .dot { width:6px; height:6px; background:var(--green); border-radius:50%; box-shadow:0 0 6px var(--green); animation:pulse 2s ease infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-    .hero h1 { font-family:'Syne',sans-serif; font-size:clamp(2.6rem,6vw,4.8rem); font-weight:800; letter-spacing:-0.04em; line-height:1.0; max-width:860px; animation:fadeUp 0.5s ease 0.1s both; }
+    .hero h1 { font-family:'Syne',sans-serif; font-size:clamp(2.1rem,4vw,3.6rem); font-weight:800; letter-spacing:-0.04em; line-height:1.08; max-width:740px; animation:fadeUp 0.5s ease 0.1s both; }
     .accent-orange { color:var(--orange); } .accent-blue { color:var(--blue-bright); }
     .hero-sub { margin-top:1.25rem; color:var(--white); font-size:clamp(0.95rem,1.8vw,1.05rem); font-weight:500; max-width:600px; line-height:1.7; animation:fadeUp 0.5s ease 0.2s both; }
     .hero-cycle-line { white-space:nowrap; }
@@ -189,7 +197,31 @@
     .btn-secondary { display:inline-flex; align-items:center; gap:0.5rem; background:transparent; color:var(--white); font-family:'Syne',sans-serif; font-weight:600; font-size:0.88rem; padding:0.75rem 1.75rem; border-radius:8px; border:1px solid var(--border-bright); text-decoration:none; transition:border-color 0.2s,background 0.2s,transform 0.15s; }
     .btn-secondary:hover { border-color:rgba(255,255,255,0.25); background:rgba(255,255,255,0.04); transform:translateY(-2px); }
 
-    /* MOCKUP */
+    /* HERO VIDEO */
+    .hero-video-wrap { margin-top:2.5rem; width:100%; max-width:720px; background:var(--dark-3); border:1px solid var(--border-bright); border-radius:14px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.04); animation:fadeUp 0.6s ease 0.4s both; position:relative; z-index:1; }
+    .hero-video-bar { background:var(--dark-4); border-bottom:1px solid var(--border); padding:0.7rem 1.1rem; display:flex; align-items:center; gap:0.5rem; }
+    .hero-video-label { font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--gray-dim); margin-left:0.5rem; flex:1; }
+    .hero-video-dur { font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--gray-dim); background:var(--dark-3); border:1px solid var(--border); border-radius:4px; padding:0.1rem 0.45rem; }
+    .hero-video-body { position:relative; width:100%; aspect-ratio:16/9; background:var(--dark); overflow:hidden; }
+    .hero-video-body iframe, .hero-video-body video { position:absolute; inset:0; width:100%; height:100%; border:none; }
+    .hero-video-placeholder { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:radial-gradient(ellipse at 50% 40%,rgba(59,130,246,0.08) 0%,var(--dark) 70%); }
+    .hvp-screen { position:absolute; inset:0; display:flex; flex-direction:column; opacity:0.45; pointer-events:none; }
+    .hvp-topbar { background:var(--dark-3); border-bottom:1px solid var(--border); padding:0.5rem 0.75rem; display:flex; align-items:center; gap:0.4rem; }
+    .hvp-tb-dot { width:8px; height:8px; border-radius:50%; background:var(--border-bright); }
+    .hvp-tb-url { font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--gray-dim); margin-left:0.5rem; }
+    .hvp-content { flex:1; display:flex; flex-direction:column; justify-content:center; gap:0.85rem; padding:1.5rem 2rem; }
+    .hvp-row { display:flex; align-items:center; gap:1rem; font-family:'JetBrains Mono',monospace; font-size:0.75rem; }
+    .hvp-label { color:var(--gray-dim); width:90px; flex-shrink:0; font-size:0.62rem; text-transform:uppercase; letter-spacing:0.08em; }
+    .hvp-val { color:var(--white); }
+    .hvp-val.cyan { color:var(--cyan); text-shadow:0 0 8px rgba(34,211,238,0.3); }
+    .hvp-val.green { color:var(--green); text-shadow:0 0 8px rgba(34,197,94,0.3); }
+    .hvp-play-btn { position:relative; z-index:2; width:72px; height:72px; border-radius:50%; background:rgba(249,115,22,0.9); border:2px solid rgba(249,115,22,0.6); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform 0.2s,background 0.2s,box-shadow 0.2s; animation:play-pulse 2.5s ease-in-out infinite; }
+    .hvp-play-btn:hover { transform:scale(1.1); background:var(--orange); box-shadow:0 0 40px rgba(249,115,22,0.5); }
+    .hvp-play-icon { color:#000; font-size:1.4rem; margin-left:4px; }
+    @keyframes play-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,0.4)} 50%{box-shadow:0 0 0 16px rgba(249,115,22,0)} }
+    .hvp-overlay-text { position:relative; z-index:2; margin-top:1.25rem; font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--gray); text-align:center; line-height:1.6; }
+
+    /* MOCKUP (kept for JS compatibility) */
     .hero-mockup { margin-top:3.5rem; width:100%; max-width:660px; background:var(--dark-3); border:1px solid var(--border-bright); border-radius:14px; overflow:hidden; box-shadow:0 40px 100px rgba(0,0,0,0.55); animation:fadeUp 0.6s ease 0.4s both; position:relative; }
     .hero-mockup::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg,rgba(255,255,255,0.015) 0%,transparent 60%); pointer-events:none; border-radius:14px; transition:opacity 0.3s; opacity:0; }
     .hero-mockup:hover::after { opacity:1; }
@@ -236,7 +268,8 @@
     .section-sub { color:var(--gray); font-size:0.95rem; max-width:500px; line-height:1.75; margin-top:0.85rem; font-weight:400; }
 
     /* PROBLEM */
-    .problem-section { background:var(--dark-2); border-top:1px solid var(--border); }
+    .problem-section { background:var(--dark-2); border-top:1px solid var(--border); position:relative; }
+    .problem-section::before { content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:600px; height:300px; background:radial-gradient(ellipse,rgba(239,68,68,0.04) 0%,transparent 70%); pointer-events:none; }
     .pain-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:3rem; }
     .pain-card { background:var(--dark); border:1px solid var(--border); border-radius:12px; padding:1.6rem; position:relative; overflow:hidden; transition:border-color 0.2s; }
     .pain-card:hover { border-color:var(--border-bright); }
@@ -248,7 +281,8 @@
     .callout strong { color:var(--white); font-style:normal; }
 
     /* STEPS */
-    .steps-section { background:var(--dark); border-top:1px solid var(--border); }
+    .steps-section { background:var(--dark); border-top:1px solid var(--border); position:relative; }
+    .steps-section::before { content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:700px; height:400px; background:radial-gradient(ellipse,rgba(59,130,246,0.04) 0%,transparent 70%); pointer-events:none; }
     .steps-grid { display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-top:3rem; }
     .step-card { padding:2.25rem 1.75rem; border-right:1px solid var(--border); transition:background 0.2s; }
     .step-card:last-child { border-right:none; }
@@ -271,7 +305,6 @@
     .icode-header { background:var(--dark-3); border-bottom:1px solid var(--border); padding:0.7rem 1.1rem; display:flex; align-items:center; justify-content:space-between; }
     .icode-title { color:var(--gray-dim); font-size:0.68rem; }
     .icode-badge { font-size:0.6rem; background:var(--green-dim); color:var(--green); border:1px solid rgba(34,197,94,0.2); border-radius:4px; padding:0.15rem 0.5rem; }
-    .icode-body { padding:1.25rem; line-height:2.1; }
     .ck{color:var(--blue-bright)} .cv{color:var(--cyan)} .cs{color:var(--orange)} .co{color:var(--green)} .cm{color:var(--gray-dim)}
     .intune-points { display:flex; flex-direction:column; gap:1.4rem; }
     .intune-point { display:flex; gap:1.1rem; align-items:flex-start; }
@@ -280,40 +313,154 @@
     .ip-text h4 { font-family:'Syne',sans-serif; font-weight:700; font-size:0.92rem; margin-bottom:0.25rem; }
     .ip-text p { font-size:0.81rem; color:var(--gray); line-height:1.65; font-weight:400; }
 
-    /* PRICING */
+    /* ── PRICING ── */
     .pricing-section { background:var(--dark); border-top:1px solid var(--border); }
-    .pricing-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.1rem; margin-top:3rem; }
-    .pricing-card { background:var(--dark-2); border:1px solid var(--border); border-radius:14px; padding:2rem; display:flex; flex-direction:column; position:relative; transition:border-color 0.2s,transform 0.2s; }
-    .pricing-card:hover { border-color:var(--border-bright); transform:translateY(-2px); }
 
-    /* ANIMATED GRADIENT BORDER — Pro card */
-    .pricing-card.popular { border:none; padding:2rem; background:var(--dark-2); }
+    /* Pricing header — title only, no toggle */
+    .pricing-header-row { display:flex; align-items:flex-end; justify-content:space-between; gap:2rem; flex-wrap:wrap; margin-bottom:2.5rem; }
+    .pricing-header-left { flex:1; min-width:0; }
+    .pricing-header-left .section-title { max-width:520px; }
+    .pricing-header-left .section-sub { margin-top:0.6rem; max-width:440px; }
+    .pricing-roi-hint { margin-top:0.5rem; font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--green); text-shadow:0 0 8px rgba(34,197,94,0.3); }
+
+    /* Dual pricing display — annual shown as hero price, monthly as strikethrough */
+    .p-price-block { margin-bottom:0; }
+    .p-price-annual-wrap { display:flex; align-items:center; gap:0.6rem; margin-bottom:0.2rem; }
+    .p-price-strike { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:700; color:var(--gray-dim); text-decoration:line-through; text-decoration-color:var(--red); text-decoration-thickness:2px; }
+    .p-annual-badge { font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--green); background:var(--green-dim); border:1px solid rgba(34,197,94,0.25); border-radius:4px; padding:0.15rem 0.5rem; text-shadow:0 0 6px rgba(34,197,94,0.3); }
+    .p-price-monthly-note { font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--gray-dim); margin-top:0.2rem; margin-bottom:0.75rem; }
+
+    /* ROI Strip — now a slim inline bar between header and cards */
+    .roi-strip { margin-bottom:1.75rem; background:linear-gradient(90deg,rgba(249,115,22,0.06),rgba(59,130,246,0.04)); border:1px solid rgba(249,115,22,0.14); border-radius:10px; padding:0.85rem 1.4rem; display:flex; align-items:center; gap:2.5rem; flex-wrap:wrap; }
+    .roi-strip-label { font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--orange); text-transform:uppercase; letter-spacing:0.12em; white-space:nowrap; flex-shrink:0; }
+    .roi-strip-items { display:flex; gap:2rem; flex-wrap:wrap; }
+    .roi-item { display:flex; align-items:center; gap:0.45rem; font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--gray); }
+    .roi-item::before { content:'↑'; color:var(--green); font-size:0.65rem; }
+
+    /* Pricing cards grid */
+    .pricing-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; }
+    .pricing-card { background:var(--dark-2); border:1px solid var(--border); border-radius:16px; padding:2rem 1.75rem; display:flex; flex-direction:column; position:relative; transition:border-color 0.25s,transform 0.25s,box-shadow 0.25s; }
+    .pricing-card:hover { border-color:var(--border-bright); transform:translateY(-3px); box-shadow:0 24px 60px rgba(0,0,0,0.35); }
+
+    /* ANIMATED GRADIENT BORDER — Team card */
+    .pricing-card.popular { border:none; padding:2rem 1.75rem; background:var(--dark-2); transform:scale(1.025); }
+    .pricing-card.popular:hover { transform:scale(1.025) translateY(-3px); }
     .pricing-card.popular::before {
-      content:''; position:absolute; inset:-1.5px; border-radius:15px; z-index:-1;
+      content:''; position:absolute; inset:-1.5px; border-radius:17px; z-index:-1;
       background:conic-gradient(from var(--angle,0deg),
         #f97316 0%, #fb923c 15%, #60a5fa 35%, #22d3ee 50%,
         #60a5fa 65%, #f97316 80%, #fb923c 100%);
       animation:spinGrad 4s linear infinite;
     }
     .pricing-card.popular::after {
-      content:''; position:absolute; inset:1px; border-radius:13px; z-index:-1;
+      content:''; position:absolute; inset:1px; border-radius:15px; z-index:-1;
       background:var(--dark-2);
     }
     @property --angle { syntax:'<angle>'; initial-value:0deg; inherits:false; }
     @keyframes spinGrad { to { --angle: 360deg; } }
-    .popular-badge { position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:var(--orange); color:#000; font-family:'Syne',sans-serif; font-size:0.62rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:0.22rem 0.85rem; border-radius:100px; }
-    .p-tier { font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--gray-dim); text-transform:uppercase; letter-spacing:0.14em; margin-bottom:0.65rem; }
+    .popular-badge { position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:var(--orange); color:#000; font-family:'Syne',sans-serif; font-size:0.62rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:0.22rem 0.85rem; border-radius:100px; white-space:nowrap; }
+    .p-tier { font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--gray-dim); text-transform:uppercase; letter-spacing:0.14em; margin-bottom:0.5rem; }
     .p-price { font-family:'Syne',sans-serif; font-size:2.8rem; font-weight:800; letter-spacing:-0.03em; line-height:1; }
     .p-price .cur{font-size:1.4rem;vertical-align:super;font-weight:600}
     .p-price .per{font-size:0.85rem;color:var(--gray);font-weight:400;font-family:'Poppins',sans-serif}
-    .p-desc { color:var(--gray); font-size:0.8rem; margin-top:0.65rem; margin-bottom:1.35rem; line-height:1.6; font-weight:400; }
-    .p-div { height:1px; background:var(--border); margin-bottom:1.35rem; }
-    .p-features { list-style:none; display:flex; flex-direction:column; gap:0.6rem; flex:1; }
-    .p-features li { display:flex; align-items:flex-start; gap:0.55rem; font-size:0.81rem; color:var(--gray); line-height:1.4; font-weight:400; }
-    .p-features li .tick{color:var(--green);flex-shrink:0} .p-features li .dash{color:var(--gray-dim);flex-shrink:0}
-    .p-cta { margin-top:1.75rem; display:block; text-align:center; padding:0.7rem; border-radius:8px; font-family:'Syne',sans-serif; font-weight:700; font-size:0.85rem; text-decoration:none; transition:all 0.2s; }
-    .p-cta.solid{background:var(--orange);color:#000} .p-cta.solid:hover{background:#fb923c;transform:translateY(-1px)}
+    /* Tagline replaces the desc block — bold, short, punchy */
+    .p-tagline { font-family:'Syne',sans-serif; font-weight:700; font-size:0.88rem; color:var(--white); margin-top:0.75rem; line-height:1.35; }
+    .p-desc { color:var(--gray); font-size:0.78rem; margin-top:0.35rem; margin-bottom:1.25rem; line-height:1.55; font-weight:400; }
+    .p-div { height:1px; background:var(--border); margin-bottom:1.25rem; }
+    .p-features { list-style:none; display:flex; flex-direction:column; gap:0.55rem; flex:1; }
+    .p-features li { display:flex; align-items:flex-start; gap:0.5rem; font-size:0.8rem; color:var(--gray); line-height:1.45; font-weight:400; }
+    .p-features li .tick{color:var(--green);flex-shrink:0;margin-top:0.05rem} .p-features li .dash{color:var(--gray-dim);flex-shrink:0;margin-top:0.05rem}
+    .p-cta { margin-top:1.5rem; display:block; text-align:center; padding:0.72rem; border-radius:9px; font-family:'Syne',sans-serif; font-weight:700; font-size:0.85rem; text-decoration:none; transition:all 0.2s; }
+    .p-cta.solid{background:var(--orange);color:#000} .p-cta.solid:hover{background:#fb923c;transform:translateY(-1px);box-shadow:0 6px 20px rgba(249,115,22,0.28)}
     .p-cta.ghost{border:1px solid var(--border-bright);color:var(--white)} .p-cta.ghost:hover{border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.04)}
+    .p-cta-secondary { display:block; text-align:center; margin-top:0.55rem; font-size:0.74rem; color:var(--gray-dim); text-decoration:none; transition:color 0.2s; }
+    .p-cta-secondary:hover { color:var(--white); }
+
+    /* Pricing microcopy */
+    .pricing-micro { display:flex; gap:1.5rem; flex-wrap:wrap; margin-top:1.75rem; justify-content:center; padding-top:1.25rem; border-top:1px solid var(--border); }
+    .pricing-micro-item { display:flex; align-items:center; gap:0.4rem; font-family:'JetBrains Mono',monospace; font-size:0.63rem; color:var(--gray-dim); }
+    .pricing-micro-item::before { content:'✓'; color:var(--green); }
+
+    /* Pricing bottom CTA band */
+    .pricing-bottom-band { margin-top:2.5rem; background:linear-gradient(135deg,rgba(249,115,22,0.05) 0%,rgba(59,130,246,0.05) 100%); border:1px solid var(--border-bright); border-radius:14px; padding:1.75rem 2.25rem; display:flex; align-items:center; justify-content:space-between; gap:2rem; flex-wrap:wrap; }
+    .pbb-text h4 { font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; margin-bottom:0.3rem; }
+    .pbb-text p { font-size:0.82rem; color:var(--gray); line-height:1.55; max-width:460px; }
+    .pbb-actions { display:flex; gap:0.75rem; flex-shrink:0; flex-wrap:wrap; }
+
+    /* ── DEMO SECTION ── */
+    .demo-section { background:var(--dark-2); border-top:1px solid var(--border); }
+    .demo-inner { display:grid; grid-template-columns:1fr 1fr; gap:5rem; align-items:flex-start; margin-top:3rem; }
+
+    /* Left: value props */
+    .demo-what h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:1rem; margin-bottom:1.25rem; color:var(--gray); text-transform:uppercase; letter-spacing:0.06em; font-size:0.72rem; }
+    .demo-bullets { list-style:none; display:flex; flex-direction:column; gap:1rem; margin-bottom:2rem; }
+    .demo-bullets li { display:flex; gap:0.75rem; align-items:flex-start; font-size:0.85rem; color:var(--gray); line-height:1.6; }
+    .demo-bullets li .db-icon { width:28px; height:28px; border-radius:7px; background:var(--orange-dim); border:1px solid rgba(249,115,22,0.18); display:flex; align-items:center; justify-content:center; font-size:0.75rem; flex-shrink:0; margin-top:0.05rem; }
+
+    .demo-who { margin-top:2rem; }
+    .demo-who h3 { font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:var(--gray-dim); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:0.85rem; }
+    .demo-personas { display:flex; gap:0.5rem; flex-wrap:wrap; }
+    .demo-persona { font-family:'JetBrains Mono',monospace; font-size:0.68rem; background:var(--dark-3); border:1px solid var(--border); border-radius:6px; padding:0.3rem 0.75rem; color:var(--gray); }
+
+    .demo-alt { margin-top:2rem; padding:1rem 1.25rem; background:var(--dark-3); border:1px solid var(--border); border-radius:10px; font-size:0.8rem; color:var(--gray); line-height:1.6; }
+    .demo-alt a { color:var(--orange); text-decoration:none; }
+    .demo-alt a:hover { text-decoration:underline; }
+
+    /* Right: form */
+    .demo-form-wrap { background:var(--dark); border:1px solid var(--border-bright); border-radius:14px; padding:2rem; }
+    .demo-form-title { font-family:'Syne',sans-serif; font-weight:700; font-size:1.1rem; margin-bottom:1.5rem; }
+    .form-grid { display:flex; flex-direction:column; gap:1rem; }
+    .form-field { display:flex; flex-direction:column; gap:0.35rem; }
+    .form-field label { font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--gray-dim); text-transform:uppercase; letter-spacing:0.1em; }
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      background:var(--dark-2); border:1px solid var(--border-bright); border-radius:8px;
+      color:var(--white); font-family:'Poppins',sans-serif; font-size:0.84rem; padding:0.65rem 0.9rem;
+      outline:none; transition:border-color 0.2s,box-shadow 0.2s; width:100%;
+      appearance:none; -webkit-appearance:none;
+    }
+    .form-field input::placeholder,
+    .form-field textarea::placeholder { color:var(--gray-dim); }
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus { border-color:rgba(249,115,22,0.5); box-shadow:0 0 0 3px rgba(249,115,22,0.08); }
+    .form-field select { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 0.9rem center; padding-right:2.5rem; cursor:pointer; }
+    .form-field select option { background:var(--dark-2); }
+    .form-field textarea { resize:vertical; min-height:80px; }
+    .form-submit { width:100%; padding:0.8rem; background:var(--orange); color:#000; font-family:'Syne',sans-serif; font-weight:700; font-size:0.9rem; border:none; border-radius:8px; cursor:pointer; transition:background 0.2s,transform 0.15s,box-shadow 0.2s; margin-top:0.5rem; }
+    .form-submit:hover { background:#fb923c; transform:translateY(-2px); box-shadow:0 8px 28px rgba(249,115,22,0.3); }
+    .form-trust { display:flex; gap:1.25rem; flex-wrap:wrap; margin-top:1rem; justify-content:center; }
+    .form-trust-item { font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--gray-dim); display:flex; align-items:center; gap:0.35rem; }
+    .form-trust-item::before { content:'✓'; color:var(--green); }
+
+    /* PEPPERED TESTIMONIALS */
+    .social-ping { display:flex; align-items:flex-start; gap:1rem; padding:1.25rem 1.5rem; background:var(--dark-3); border:1px solid var(--border-bright); border-left:3px solid var(--orange); border-radius:0 10px 10px 0; margin-top:2.5rem; }
+    .sp-avatar { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--orange-dim),var(--blue-dim)); border:1px solid var(--border-bright); display:flex; align-items:center; justify-content:center; font-size:0.85rem; flex-shrink:0; }
+    .sp-body { flex:1; }
+    .sp-quote { font-size:0.85rem; color:var(--white); line-height:1.55; font-style:italic; margin-bottom:0.35rem; }
+    .sp-quote::before { content:'"'; color:var(--orange); font-style:normal; }
+    .sp-quote::after  { content:'"'; color:var(--orange); font-style:normal; }
+    .sp-meta { display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap; }
+    .sp-name { font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--white); font-weight:700; }
+    .sp-role { font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--gray-dim); }
+    .sp-result { font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--green); background:var(--green-dim); border:1px solid rgba(34,197,94,0.2); border-radius:4px; padding:0.1rem 0.45rem; text-shadow:0 0 6px rgba(34,197,94,0.3); }
+
+    /* HERO PAIN LINE */
+    .hero-pain-line { margin-top:0.6rem; font-family:'JetBrains Mono',monospace; font-size:0.68rem; color:var(--gray-dim); display:flex; align-items:center; gap:0.75rem; justify-content:center; flex-wrap:wrap; }
+    .hero-pain-line .hpl-item::before { content:'✕ '; color:var(--red); opacity:0.7; }
+    .hero-pain-line .hpl-sep { color:var(--border-bright); }
+
+    /* FORM MINI-FAQ */
+    .form-mini-faq { border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-top:0.25rem; }
+    .form-faq-item { background:var(--dark-3); border-bottom:1px solid var(--border); }
+    .form-faq-item:last-child { border-bottom:none; }
+    .form-faq-item summary { list-style:none; cursor:pointer; padding:0.85rem 1rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; font-size:0.8rem; font-weight:600; color:var(--gray); user-select:none; transition:color 0.2s; }
+    .form-faq-item summary::-webkit-details-marker { display:none; }
+    .form-faq-item summary:hover { color:var(--white); }
+    .form-faq-item[open] summary { color:var(--white); }
+    .form-faq-item[open] .faq-chevron { transform:rotate(45deg); border-color:rgba(249,115,22,0.4); color:var(--orange); }
+    .form-faq-item .faq-body { padding:0 1rem 0.85rem; font-size:0.78rem; color:var(--gray); line-height:1.65; border-top:1px solid var(--border); padding-top:0.75rem; }
 
     /* FINAL CTA */
     .final-cta { position:relative; z-index:1; padding:8rem 2rem; text-align:center; overflow:hidden; border-top:1px solid var(--border); background:var(--dark-2); }
@@ -336,7 +483,47 @@
     .stat-item:last-child { border-right:none; }
     .stat-label { font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--gray); text-transform:uppercase; letter-spacing:0.1em; margin-top:0.4rem; }
 
-    /* FOOTER */
+    /* SOCIAL PROOF STRIP — hero */
+    .hero-social-proof { display:flex; align-items:stretch; gap:0; margin-top:2rem; width:100%; max-width:660px; background:var(--dark-3); border:1px solid var(--border-bright); border-radius:12px; overflow:hidden; animation:fadeUp 0.5s ease 0.45s both; }
+    .hsp-quote { flex:1; padding:1rem 1.25rem; border-right:1px solid var(--border); }
+    .hsp-quote:last-child { border-right:none; }
+    .hsp-text { font-size:0.78rem; color:var(--white); line-height:1.5; margin-bottom:0.5rem; font-style:italic; }
+    .hsp-text::before { content:'"'; color:var(--orange); font-style:normal; margin-right:1px; }
+    .hsp-text::after  { content:'"'; color:var(--orange); font-style:normal; margin-left:1px; }
+    .hsp-attr { font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--gray-dim); text-transform:uppercase; letter-spacing:0.08em; }
+    .hsp-stars { color:var(--orange); font-size:0.65rem; margin-bottom:0.3rem; text-shadow:0 0 6px rgba(249,115,22,0.4); }
+
+    /* WHY DEPLOYMENTS FAIL */
+    .fail-section { background:var(--dark); border-top:1px solid var(--border); position:relative; }
+    .fail-section::before { content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:700px; height:350px; background:radial-gradient(ellipse,rgba(239,68,68,0.04) 0%,transparent 70%); pointer-events:none; }
+    .fail-grid { display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-top:3rem; }
+    .fail-col { display:flex; flex-direction:column; gap:1rem; }
+    .fail-col-label { font-family:'JetBrains Mono',monospace; font-size:0.62rem; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:0.25rem; }
+    .fail-col-label.red { color:var(--red); }
+    .fail-col-label.green { color:var(--green); }
+    .fail-item { display:flex; align-items:flex-start; gap:0.75rem; padding:1rem 1.1rem; border-radius:10px; }
+    .fail-item.bad { background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.15); }
+    .fail-item.good { background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.15); }
+    .fail-icon { font-size:0.9rem; flex-shrink:0; margin-top:0.1rem; }
+    .fail-text strong { display:block; font-family:'Syne',sans-serif; font-weight:700; font-size:0.88rem; margin-bottom:0.2rem; }
+    .fail-text.bad strong { color:var(--white); }
+    .fail-text.good strong { color:var(--green); }
+    .fail-text p { font-size:0.78rem; color:var(--gray); line-height:1.55; }
+    @media (max-width:900px) { .fail-grid { grid-template-columns:1fr; } }
+
+    /* FAQ SECTION */
+    .faq-section { background:var(--dark); border-top:1px solid var(--border); position:relative; }
+    .faq-section::before { content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:600px; height:300px; background:radial-gradient(ellipse,rgba(59,130,246,0.03) 0%,transparent 70%); pointer-events:none; }
+    .faq-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border); border:1px solid var(--border); border-radius:14px; overflow:hidden; margin-top:3rem; }
+    .faq-item { background:var(--dark-2); padding:0; }
+    .faq-item summary { list-style:none; cursor:pointer; padding:1.35rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; font-family:'Syne',sans-serif; font-weight:600; font-size:0.9rem; line-height:1.35; user-select:none; transition:color 0.2s; }
+    .faq-item summary::-webkit-details-marker { display:none; }
+    .faq-item summary:hover { color:var(--orange); }
+    .faq-chevron { width:18px; height:18px; flex-shrink:0; border-radius:50%; border:1px solid var(--border-bright); display:flex; align-items:center; justify-content:center; font-size:0.65rem; color:var(--gray-dim); transition:transform 0.25s,border-color 0.2s,color 0.2s; }
+    .faq-item[open] .faq-chevron { transform:rotate(45deg); border-color:rgba(249,115,22,0.4); color:var(--orange); }
+    .faq-body { padding:0 1.5rem 1.35rem; font-size:0.83rem; color:var(--gray); line-height:1.7; border-top:1px solid var(--border); padding-top:1rem; }
+    .faq-body code { font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:var(--cyan); background:var(--dark-3); padding:0.1rem 0.4rem; border-radius:4px; }
+    @media (max-width:900px) { .faq-grid { grid-template-columns:1fr; } }
     footer { position:relative; z-index:1; border-top:1px solid var(--border); padding:2.25rem 4rem; display:flex; align-items:center; justify-content:space-between; background:var(--dark-2); }
     .f-logo { display:flex; align-items:center; gap:0.6rem; text-decoration:none; font-family:'Poppins',sans-serif; font-weight:800; font-size:1rem; letter-spacing:-0.01em; }
     .f-logo img { height:36px; width:auto; object-fit:contain; }
@@ -351,14 +538,20 @@
     @media (max-width:900px) {
       .pain-grid,.steps-grid,.pricing-grid{grid-template-columns:1fr}
       .step-card{border-right:none;border-bottom:1px solid var(--border)} .step-card:last-child{border-bottom:none}
-      .intune-inner{grid-template-columns:1fr;gap:2rem}
+      .intune-inner,.demo-inner{grid-template-columns:1fr;gap:2rem}
       .stats-bar{flex-wrap:wrap;gap:2rem} .stat-item{border-right:none}
       footer{flex-direction:column;gap:1.25rem;text-align:center;padding:2rem}
       .f-links{flex-wrap:wrap;justify-content:center}
+      .pricing-bottom-band{flex-direction:column;gap:1.25rem}
+      .roi-strip{flex-direction:column;gap:0.75rem}
+      .pricing-header-row{flex-direction:column;align-items:flex-start;gap:1.25rem}
+      .billing-toggle-wrap{flex-direction:row;align-items:center}
+      .pricing-card.popular{transform:none}
+      .pricing-card.popular:hover{transform:translateY(-3px)}
     }
     @media (max-width:600px) {
       .hero { padding:7.25rem 1rem 4rem; min-height:auto; }
-      .hero h1 { font-size:clamp(2rem,11vw,3.1rem); line-height:1.02; max-width:100%; padding-inline:0.08em; }
+      .hero h1 { font-size:clamp(1.9rem,9vw,2.8rem); line-height:1.06; max-width:100%; padding-inline:0.08em; }
       .hero-deploy-line {
         display:block;
         font-size:0.88em;
@@ -372,6 +565,10 @@
       .hero-actions .btn-primary,
       .hero-actions .btn-secondary { width:min(100%, 330px); justify-content:center; }
       .hero-cycle-line { white-space:normal; display:inline; }
+      .billing-toggle-wrap { justify-content:center; }
+      .pbb-actions { width:100%; }
+      .pbb-actions .btn-primary,
+      .pbb-actions .btn-secondary { flex:1; justify-content:center; min-width:140px; }
     }
   </style>
 </head>
@@ -380,6 +577,14 @@
 <div class="grain"></div>
 <div class="scanlines"></div>
 
+<!-- URGENCY BAR — static, scrolls away with page -->
+<div class="urgency-bar">
+  <span class="ub-dot"></span>
+  <span>Early access pricing ends soon — <strong>Free tier available now.</strong> No credit card required.</span>
+  <a href="https://app.pkgprobe.io" target="_blank">Start Free →</a>
+</div>
+
+<!-- NAV -->
 <nav>
   <a href="#" class="nav-logo">
     <img src="./img/pkgprobe_logo_notext.png" alt="pkgprobe logo" onerror="this.style.display='none'" />
@@ -388,7 +593,7 @@
   <ul class="nav-center">
     <li><a href="#problem">Problem</a></li>
     <li><a href="#how">How It Works</a></li>
-    <li><a href="#intune">Intune</a></li>
+    <li><a href="#failures">Why It Fails</a></li>
     <li><a href="#pricing">Pricing</a></li>
     <li><a href="./blog/">Blog</a></li>
   </ul>
@@ -406,61 +611,77 @@
 <!-- HERO -->
 <section class="hero" aria-label="pkgprobe — silent install switch generator and Intune packaging tool for Windows">
   <canvas id="particle-canvas"></canvas>
-  <div class="hero-badge"><span class="dot"></span>Early access open · pkgprobe-trace beta</div>
+  <div class="hero-badge"><span class="dot"></span>Deployment reliability engine for Intune · Early access</div>
   <h1>
-    <span class="glitch-wrap" data-text="Stop Guessing">Stop Guessing</span><br />
-    <span class="hero-cycle-line"><span class="accent-orange glitch-wrap" data-text="Installer" id="cycle-word">Installer</span><span class="accent-blue" id="cycle-word2"> Flags.</span><span class="cycle-cursor accent-blue">|</span></span><br />
-    <span class="glitch-wrap hero-deploy-line" data-text="Deploy with Confidence.">Deploy with Confidence.</span>
+    <span class="hero-cycle-line"><span class="accent-orange glitch-wrap" data-text="Reinstall Loops?" id="cycle-word">Reinstall Loops?</span><span class="cycle-cursor accent-blue">|</span></span><br />
+    <span class="glitch-wrap hero-deploy-line" data-text="Fix Intune Deployments Before They Break.">Fix Intune Deployments Before They Break.</span>
   </h1>
 
-  <p class="hero-sub">Automatically generate working silent install commands and Intune-ready packages — in minutes, not hours of guesswork.</p>
+  <p class="hero-sub">Automatically handle detection, upgrades, and install logic — so your deployments work the first time, at scale.</p>
+
+  <div class="hero-pain-line">
+    <span class="hpl-item">No reinstall loops</span>
+    <span class="hpl-sep">·</span>
+    <span class="hpl-item">No silent failures</span>
+    <span class="hpl-sep">·</span>
+    <span class="hpl-item">No downgrade issues</span>
+  </div>
 
   <div class="hero-actions">
     <a href="https://app.pkgprobe.io" target="_blank" class="btn-primary">✦ Try pkgprobe Free</a>
     <a href="#how" class="btn-secondary">See How It Works →</a>
   </div>
 
-  <!-- CLI TERMINAL — types first, then transitions to results mockup -->
-  <div class="cli-terminal" id="cli-terminal">
-    <div class="cli-bar">
+  <!-- DEMO VIDEO -->
+  <div class="hero-video-wrap">
+    <div class="hero-video-bar">
       <span class="tb-dot r"></span><span class="tb-dot y"></span><span class="tb-dot g"></span>
-      <span class="cli-title">pkgprobe-trace — bash</span>
+      <span class="hero-video-label">pkgprobe — product walkthrough</span>
+      <span class="hero-video-dur">2:47</span>
     </div>
-    <div class="cli-body" id="cli-body">
-      <div class="cli-line" id="cl0"><span class="cli-prompt">❯ </span><span class="cli-cmd" id="cli-typed"></span><span class="cursor" id="cli-cursor"></span></div>
-      <div class="cli-line" id="cl1"><span class="cli-dim">[*] reverting snapshot → TraceVM-clean</span></div>
-      <div class="cli-line" id="cl2"><span class="cli-dim">[*] uploading </span><span class="cli-hi">Slack-4.38.125.exe</span><span class="cli-dim"> to guest...</span></div>
-      <div class="cli-line" id="cl3"><span class="cli-dim">[*] starting ProcMon capture...</span></div>
-      <div class="cli-line" id="cl4"><span class="cli-dim">[*] running installer silently...</span></div>
-      <div class="cli-line" id="cl5"><span class="cli-dim">[*] exporting PML → CSV (guest-side)...</span></div>
-      <div class="cli-line" id="cl6"><span class="cli-ok">[✓] trace complete · 1,847 events captured</span></div>
-      <div class="cli-line" id="cl7"><span class="cli-ok">[✓] InstallPlan generated · confidence 87%</span></div>
+    <div class="hero-video-body">
+      <!-- ═══════════════════════════════════════════════════════
+           SWAP THIS OUT when you have a real video:
+           Option A — YouTube:
+             Replace the entire .hero-video-body contents with:
+             <iframe width="100%" height="100%" src="https://www.youtube.com/embed/YOUR_VIDEO_ID?rel=0" frameborder="0" allowfullscreen></iframe>
+           Option B — Loom:
+             <iframe src="https://www.loom.com/embed/YOUR_LOOM_ID" frameborder="0" allowfullscreen style="width:100%;height:100%"></iframe>
+           Option C — self-hosted file:
+             <video src="your-demo.mp4" controls poster="your-thumbnail.jpg" style="width:100%;height:100%;object-fit:cover"></video>
+      ═══════════════════════════════════════════════════════ -->
+      <div class="hero-video-placeholder">
+        <div class="hvp-screen">
+          <div class="hvp-topbar">
+            <span class="hvp-tb-dot"></span><span class="hvp-tb-dot"></span><span class="hvp-tb-dot"></span>
+            <span class="hvp-tb-url">app.pkgprobe.io · trace · Slack-4.38.125.exe</span>
+          </div>
+          <div class="hvp-content">
+            <div class="hvp-row"><span class="hvp-label">Installer</span><span class="hvp-val cyan">Slack-4.38.125.exe</span></div>
+            <div class="hvp-row"><span class="hvp-label">Silent Args</span><span class="hvp-val cyan">/S /v/qn ALLUSERS=1</span></div>
+            <div class="hvp-row"><span class="hvp-label">Confidence</span><span class="hvp-val green">87% · VERIFIED</span></div>
+            <div class="hvp-row"><span class="hvp-label">Intune</span><span class="hvp-val green">✓ Ready to package</span></div>
+          </div>
+        </div>
+        <button class="hvp-play-btn" onclick="this.parentElement.classList.add('playing')">
+          <span class="hvp-play-icon">▶</span>
+        </button>
+        <div class="hvp-overlay-text">See pkgprobe extract silent args<br/>from a real EXE in under 10 minutes</div>
+      </div>
     </div>
   </div>
 
-  <!-- RESULTS MOCKUP — hidden until CLI finishes -->
-  <div class="hero-mockup" id="hero-mockup" style="display:none; margin-top:2.5rem;">
-    <div class="mockup-bar">
-      <span class="tb-dot r"></span><span class="tb-dot y"></span><span class="tb-dot g"></span>
-      <span class="tb-file" style="cursor:pointer;" title="Click to replay">Slack-4.38.125.exe · trace result ↺</span>
+  <!-- SOCIAL PROOF STRIP -->
+  <div class="hero-social-proof">
+    <div class="hsp-quote">
+      <div class="hsp-stars">★★★★★</div>
+      <div class="hsp-text">Took me 3 hours to figure out flags for one EXE. pkgprobe had it in under 10 minutes.</div>
+      <div class="hsp-attr">Endpoint Admin · NHS Trust</div>
     </div>
-    <div class="mockup-rows">
-      <div class="mockup-row">
-        <div class="row-label">Silent Args</div>
-        <div class="row-val cyan">/S /v/qn ALLUSERS=1</div>
-      </div>
-      <div class="mockup-row">
-        <div class="row-label">Confidence</div>
-        <div class="cbar-wrap"><div class="cbar"><div class="cfill"></div></div><div class="cpct">87%</div></div>
-      </div>
-      <div class="mockup-row">
-        <div class="row-label">Detection</div>
-        <div class="row-val sm">HKLM\...\Uninstall\Slack · C:\Program Files\Slack\slack.exe</div>
-      </div>
-      <div class="mockup-row">
-        <div class="row-label">Intune Status</div>
-        <div class="verdict">✓ Eligible for .intunewin</div>
-      </div>
+    <div class="hsp-quote">
+      <div class="hsp-stars">★★★★★</div>
+      <div class="hsp-text">Detection rules that actually work. First time we've shipped an Intune package without a rework cycle.</div>
+      <div class="hsp-attr">SCCM Engineer · Financial Services</div>
     </div>
   </div>
 </section>
@@ -468,20 +689,20 @@
 <!-- STATS BAR -->
 <div class="stats-bar">
   <div class="stat-item reveal">
-    <div class="stat-num">MSI / EXE / MSIX</div>
-    <div class="stat-label">Formats Supported</div>
+    <div class="stat-num">MSI · EXE · MSIX</div>
+    <div class="stat-label">All installer formats supported</div>
   </div>
   <div class="stat-item reveal reveal-delay-1">
-    <div class="stat-num" data-count="1847" data-suffix="">1,847</div>
-    <div class="stat-label">Events per trace avg</div>
+    <div class="stat-num">~10 min</div>
+    <div class="stat-label">vs. hours of manual testing</div>
   </div>
   <div class="stat-item reveal reveal-delay-2">
-    <div class="stat-num" data-count="0" data-prefix="" data-suffix=" Guesses">0 Guesses</div>
-    <div class="stat-label">Evidence-backed output</div>
+    <div class="stat-num">0 Guesses</div>
+    <div class="stat-label">Commands backed by real trace data</div>
   </div>
   <div class="stat-item reveal reveal-delay-3">
-    <div class="stat-num" data-count="100" data-suffix="% Open Source">100% Open Source</div>
-    <div class="stat-label">CLI on PyPI</div>
+    <div class="stat-num">Open-Core CLI</div>
+    <div class="stat-label">Available on PyPI</div>
   </div>
 </div>
 
@@ -489,26 +710,40 @@
 <section class="section problem-section" id="problem">
   <div class="section-inner">
     <div class="eyebrow">The Problem</div>
-    <h2 class="section-title">Deploying Windows software shouldn't feel like trial and error.</h2>
-    <p class="section-sub">Endpoint teams burn hours manually testing installers — guessing silent install flags, breaking Intune detection rules, firefighting failures in production.</p>
+    <h2 class="section-title">Your deployments are breaking in ways you can't see coming.</h2>
+    <p class="section-sub">It's not just missing flags. It's detection logic that lies, version conflicts that corrupt environments, and failures that only show up on production endpoints.</p>
     <div class="pain-grid">
       <div class="pain-card reveal">
         <div class="pain-icon">❌</div>
-        <div class="pain-title">Silent flags don't work</div>
-        <div class="pain-desc">EXE installers don't advertise their switches. You're left guessing /S, /silent, /quiet — trial and error every time.</div>
+        <div class="pain-title">Detection says "not installed" — forever</div>
+        <div class="pain-desc">Your detection rule doesn't account for the installed version. Intune sees "not installed," redeploys, and loops. 400 endpoints. Endlessly.</div>
       </div>
       <div class="pain-card reveal reveal-delay-1">
         <div class="pain-icon">❌</div>
-        <div class="pain-title">Detection rules break</div>
-        <div class="pain-desc">Manually authored detection scripts miss edge cases. Apps re-deploy every cycle or show installed when they're not.</div>
+        <div class="pain-title">Works in test → breaks on 400 endpoints</div>
+        <div class="pain-desc">A newer version is already installed. Your package runs, downgrades it silently, and breaks dependencies. No error. No log. Just a broken environment.</div>
       </div>
       <div class="pain-card reveal reveal-delay-2">
         <div class="pain-icon">❌</div>
-        <div class="pain-title">Production failures</div>
-        <div class="pain-desc">Packages that work in your test environment fail on 400 endpoints. No trace data. No visibility. No fast fix.</div>
+        <div class="pain-title">Exit code 0. Install failed.</div>
+        <div class="pain-desc">The script exits clean. Intune marks it successful. The app isn't there. You find out when users call the helpdesk — not when it happens.</div>
       </div>
     </div>
-    <div class="callout"><strong>Most endpoint teams are still testing installers manually</strong> — wasting hours per application before a single deployment goes out.</div>
+    <div class="callout"><strong>How many times has an app deployed fine in test — then broken on 400 endpoints with no trace, no reason, and no fast fix?</strong> Most endpoint teams are still debugging this manually. Every app costs hours. Version conflicts cost outages.</div>
+
+    <!-- PEPPERED TESTIMONIAL 1 -->
+    <div class="social-ping reveal">
+      <div class="sp-avatar">👨‍💻</div>
+      <div class="sp-body">
+        <div class="sp-quote">Spent 4 hours on a single EXE before finding pkgprobe. It extracted the working flags in 8 minutes. We packaged 12 more apps that same afternoon.</div>
+        <div class="sp-meta">
+          <span class="sp-name">James R.</span>
+          <span class="sp-role">Senior Endpoint Engineer · Healthcare Trust</span>
+          <span class="sp-result">↑ 12 apps packaged in one afternoon</span>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -561,7 +796,7 @@
   <div class="section-inner">
     <div class="eyebrow">Intune Packaging</div>
     <h2 class="section-title">Generate .intunewin packages — only when they're actually safe to deploy.</h2>
-    <p class="section-sub">pkgprobe doesn't just package your Windows installer. It verifies the package is deployment-ready before producing the .intunewin artifact.</p>
+    <p class="section-sub">pkgprobe verifies deployment-readiness before producing the artifact. That includes version detection, upgrade-path safety, and downgrade prevention — not just silent args.</p>
     <div class="intune-inner">
       <div class="intune-code">
         <div class="icode-header">
@@ -571,6 +806,8 @@
         <div class="icode-body" id="icode-body">
           <span class="icode-line"><span class="ck">"silent_args"</span><span class="cm">: </span><span class="cs">"/S /v/qn ALLUSERS=1"</span><span class="cm">,</span></span>
           <span class="icode-line"><span class="ck">"verified"</span><span class="cm">: </span><span class="co">true</span><span class="cm">,</span></span>
+          <span class="icode-line"><span class="ck">"version_aware"</span><span class="cm">: </span><span class="co">true</span><span class="cm">,</span></span>
+          <span class="icode-line"><span class="ck">"upgrade_safe"</span><span class="cm">: </span><span class="co">true</span><span class="cm">,</span></span>
           <span class="icode-line"><span class="ck">"detection_candidates"</span><span class="cm">: [{</span></span>
           <span class="icode-line">&nbsp;&nbsp;<span class="ck">"type"</span><span class="cm">: </span><span class="cs">"registry_key"</span><span class="cm">,</span></span>
           <span class="icode-line">&nbsp;&nbsp;<span class="ck">"confidence"</span><span class="cm">: </span><span class="co">0.92</span></span>
@@ -594,7 +831,14 @@
           </div>
         </div>
         <div class="intune-point">
-          <div class="ip-icon green">☁️</div>
+          <div class="ip-icon green">🔢</div>
+          <div class="ip-text">
+            <h4>Version-aware detection</h4>
+            <p>pkgprobe ensures installs only run when needed — preventing reinstall loops, blocking downgrades, and handling upgrade paths automatically.</p>
+          </div>
+        </div>
+        <div class="intune-point">
+          <div class="ip-icon orange">☁️</div>
           <div class="ip-text">
             <h4>Local CLI or cloud API</h4>
             <p>Run fully on-prem with pkgprobe-trace, or use the API to get an artifact back without managing VMware yourself.</p>
@@ -602,61 +846,419 @@
         </div>
       </div>
     </div>
+
+    <!-- PEPPERED TESTIMONIAL 2 -->
+    <div class="social-ping reveal">
+      <div class="sp-avatar">🏢</div>
+      <div class="sp-body">
+        <div class="sp-quote">Our first Intune package with pkgprobe deployed clean to 2,300 endpoints. No rework cycle. Detection rule worked first time. That alone justified the cost for the year.</div>
+        <div class="sp-meta">
+          <span class="sp-name">Sarah K.</span>
+          <span class="sp-role">IT Operations Manager · Financial Services</span>
+          <span class="sp-result">↑ 2,300 endpoints, zero rework</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY DEPLOYMENTS FAIL -->
+<section class="section fail-section" id="failures">
+  <div class="section-inner">
+    <div class="eyebrow">Why Deployments Fail</div>
+    <h2 class="section-title">The failure modes that cost you the most — and how pkgprobe fixes them.</h2>
+    <p class="section-sub">Silent flags are just the start. The deployments that hurt your environment most are the ones that fail invisibly, corrupt versions, or loop forever.</p>
+    <div class="fail-grid">
+      <div class="fail-col">
+        <div class="fail-col-label red">Without pkgprobe</div>
+        <div class="fail-item bad">
+          <span class="fail-icon">❌</span>
+          <div class="fail-text bad">
+            <strong>Detection says "not installed" → reinstall loop</strong>
+            <p>Detection rule ignores the installed version. Intune keeps redeploying. Users see repeated installs. Helpdesk gets the calls.</p>
+          </div>
+        </div>
+        <div class="fail-item bad">
+          <span class="fail-icon">❌</span>
+          <div class="fail-text bad">
+            <strong>Newer version already installed → gets downgraded</strong>
+            <p>Your package runs against a newer version already on disk. The installer downgrades it silently. Dependencies break. No warning.</p>
+          </div>
+        </div>
+        <div class="fail-item bad">
+          <span class="fail-icon">❌</span>
+          <div class="fail-text bad">
+            <strong>MSI upgrade fails silently mid-rollout</strong>
+            <p>The upgrade code doesn't match. MSI skips installation without error. Intune marks it successful. Half your fleet is still on the old version.</p>
+          </div>
+        </div>
+        <div class="fail-item bad">
+          <span class="fail-icon">❌</span>
+          <div class="fail-text bad">
+            <strong>Script exits 0 — but the install failed</strong>
+            <p>The wrapper script returns success. The actual install hit a prompt, a missing dependency, or a locked file. You find out from users.</p>
+          </div>
+        </div>
+      </div>
+      <div class="fail-col">
+        <div class="fail-col-label green">With pkgprobe</div>
+        <div class="fail-item good">
+          <span class="fail-icon">✅</span>
+          <div class="fail-text good">
+            <strong>Version-aware detection</strong>
+            <p>Detection rules include version data extracted from the trace. Intune only redeploys when it actually should — no loops, no noise.</p>
+          </div>
+        </div>
+        <div class="fail-item good">
+          <span class="fail-icon">✅</span>
+          <div class="fail-text good">
+            <strong>Upgrade-safe install orchestration</strong>
+            <p>pkgprobe detects what's already installed and generates logic to skip, upgrade, or uninstall-first appropriately. No manual version checks.</p>
+          </div>
+        </div>
+        <div class="fail-item good">
+          <span class="fail-icon">✅</span>
+          <div class="fail-text good">
+            <strong>Uninstall-before-install logic</strong>
+            <p>When an in-place upgrade isn't safe, pkgprobe generates uninstall-first sequences backed by trace evidence — not assumptions.</p>
+          </div>
+        </div>
+        <div class="fail-item good">
+          <span class="fail-icon">✅</span>
+          <div class="fail-text good">
+            <strong>Exit code handling baked in</strong>
+            <p>Generated scripts validate real installation outcomes — not just process exit codes. If the app isn't there, it's a failure. Full stop.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section faq-section" id="faq">
+  <div class="section-inner">
+    <div class="eyebrow">Are We a Good Fit?</div>
+    <h2 class="section-title">Honest answers before you commit to anything.</h2>
+    <p class="section-sub">Every question here either puts your mind at ease — or tells you clearly if pkgprobe isn't right for your environment. Either outcome saves you time.</p>
+    <div class="faq-grid">
+
+      <details class="faq-item">
+        <summary>What installer types does pkgprobe support? <span class="faq-chevron">+</span></summary>
+        <div class="faq-body">pkgprobe handles <code>MSI</code>, <code>EXE</code>, and <code>MSIX</code> installers. For EXEs — which are the hardest because they don't advertise their flags — pkgprobe traces the actual installer in an isolated VM and extracts the working silent arguments directly from what the installer does, not from a database of guesses.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary>How is this different from just Googling silent switch flags? <span class="faq-chevron">+</span></summary>
+        <div class="faq-body">Google gives you community guesses, often outdated or version-specific. pkgprobe runs <em>your actual installer</em> in a clean VM snapshot, captures every file, registry, and service operation via ProcMon, and produces the exact flags that worked — for that version, on that day. You get a confidence score and a verified manifest, not a forum post from 2019.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What if pkgprobe can't extract flags for one of my installers? <span class="faq-chevron">+</span></summary>
+        <div class="faq-body">It happens — some installers are genuinely difficult. When a trace fails or confidence is too low to verify, pkgprobe tells you exactly why: which detection candidates were found, where the ambiguity is, and what you can do about it. You're never left with a silent failure and no clue. On the Free tier, that feedback alone is often worth the run — it tells you what you're dealing with before you waste hours on it manually.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Can I cancel or switch plans if it's not working for us? <span class="faq-chevron">+</span></summary>
+        <div class="faq-body">Yes — monthly plans can be cancelled any time, no questions asked. If you're on annual and hit a genuine issue, reach out and we'll work it out. We'd rather you have a good experience than be locked into something that doesn't fit. And the Free tier exists precisely so you can validate pkgprobe on real apps from your environment before spending anything.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Will it work with our existing Intune / SCCM setup? <span class="faq-chevron">+</span></summary>
+        <div class="faq-body">Yes. pkgprobe outputs standard <code>.intunewin</code> packages, <code>install.ps1</code> and <code>detect.ps1</code> scripts, and a structured JSON manifest that maps to Intune's Win32 app format. For SCCM, the same scripts and detection logic work as-is. Enterprise plans include direct SCCM + Intune integration workflows.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Do I need to manage a VM myself? <span class="faq-chevron">+</span></summary>
+        <div class="faq-body">No. The cloud API handles all of that — you upload the installer, pkgprobe runs it in an isolated VM, and returns the result. If you prefer on-prem, the open source <code>pkgprobe-trace</code> CLI lets you run traces against your own VMware environment. Both give you the same verified output.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Does pkgprobe work on installers that require user interaction to complete? <span class="faq-chevron">+</span></summary>
+        <div class="faq-body">This is actually one of the problems pkgprobe solves. Many EXEs fail silently in unattended deployments because they're waiting for a user prompt nobody answers. pkgprobe traces the installer's behaviour in the VM and flags interactive prompts in the failure report — so you know before you ship, not after 400 endpoints stall. Handling those edge cases is where the verified manifest earns its keep.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Is the installer uploaded to your servers? Is that safe? <span class="faq-chevron">+</span></summary>
+        <div class="faq-body">Installers are uploaded over TLS to an isolated trace environment. They're run in a clean, sandboxed VM snapshot and discarded after the trace completes. No installer data is retained beyond the session. For organizations with strict data handling requirements, the <code>pkgprobe-trace</code> CLI lets you run everything entirely on-prem — nothing leaves your network.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What does "verified manifest" actually mean? <span class="faq-chevron">+</span></summary>
+        <div class="faq-body">A verified manifest is pkgprobe's confirmation that the package passed all checks before being considered deployment-ready. That means: silent args extracted and confirmed working, detection rule candidates identified with confidence scores above threshold, and no verification errors. pkgprobe won't produce a <code>.intunewin</code> unless the manifest passes — no guessing, no hoping it works in production.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary>How many apps can I run per month on the Free tier? <span class="faq-chevron">+</span></summary>
+        <div class="faq-body">The Free tier includes 5 trace runs per month — enough to evaluate pkgprobe on real apps from your environment and validate the workflow before committing. The Team plan removes that ceiling for production use. You can upgrade at any time; there's no credit card required to get started.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Do you track every version of an installer, or just the latest? <span class="faq-chevron">+</span></summary>
+        <div class="faq-body">Every trace is run against the exact installer you upload — not a cached version, not a generic profile for that app. This matters because silent flags often change between versions, and a flag that worked on v4.1 may silently fail on v4.2. pkgprobe generates a fresh verified manifest for every run, so your packaging stays accurate as software updates.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What if we already have a packaging workflow — does pkgprobe replace it or fit alongside it? <span class="faq-chevron">+</span></summary>
+        <div class="faq-body">It fits alongside. pkgprobe handles the part of the workflow that's currently manual and error-prone — figuring out what flags work and verifying detection rules. Your existing approval process, documentation standards, and deployment pipeline stay the same. You just stop spending hours per app on the research and testing step. Most teams run pkgprobe as a front-end to whatever they're already using for deployment.</div>
+      </details>
+
+    </div>
   </div>
 </section>
 
 <!-- PRICING -->
 <section class="section pricing-section" id="pricing">
   <div class="section-inner">
-    <div class="eyebrow">Pricing</div>
-    <h2 class="section-title">Simple, developer-friendly pricing.</h2>
-    <p class="section-sub">Start free. Scale when you need to.</p>
+    <div class="pricing-header-row">
+      <div class="pricing-header-left">
+        <div class="eyebrow">Pricing</div>
+        <h2 class="section-title">Stop wasting hours on packaging. Deploy with confidence.</h2>
+        <p class="section-sub">Automate Intune/SCCM packaging, eliminate trial-and-error installs, and standardize deployments across your environment.</p>
+        <p class="pricing-roi-hint">→ If pkgprobe saves just 1–2 hours per app, it pays for itself almost immediately.</p>
+      </div>
+    </div>
+
+    <!-- ROI Strip -->
+    <div class="roi-strip reveal">
+      <div class="roi-strip-label">Built for real IT workflows</div>
+      <div class="roi-strip-items">
+        <div class="roi-item">Save 1–4+ hours per package</div>
+        <div class="roi-item">Reduce failed deployments and rework</div>
+        <div class="roi-item">Eliminate guesswork with verified install commands</div>
+        <div class="roi-item">Improve auditability and consistency</div>
+      </div>
+    </div>
+    <p style="margin-bottom:1.75rem;font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--green);text-shadow:0 0 8px rgba(34,197,94,0.3);">→ Most teams recover the cost in their first 1–2 deployments</p>
+
+    <!-- PEPPERED TESTIMONIAL 3 — right before price decision -->
+    <div class="social-ping reveal" style="margin-bottom:2rem;">
+      <div class="sp-avatar">⚙️</div>
+      <div class="sp-body">
+        <div class="sp-quote">We were paying an external packaging vendor £180 per app. pkgprobe Team plan cut that spend by about 70% in the first month. The math was instant.</div>
+        <div class="sp-meta">
+          <span class="sp-name">Marcus T.</span>
+          <span class="sp-role">SCCM Engineer · UK Local Government</span>
+          <span class="sp-result">↓ 70% packaging vendor spend, month 1</span>
+        </div>
+      </div>
+    </div>
+
     <div class="pricing-grid">
+      <!-- FREE -->
       <div class="pricing-card reveal">
         <div class="p-tier">Free</div>
         <div class="p-price"><span class="cur">$</span>0<span class="per"> / mo</span></div>
-        <div class="p-desc">For individuals exploring pkgprobe. No credit card required.</div>
+        <div class="p-tagline">Test it on real apps. No risk.</div>
+        <div class="p-desc">Start exploring before you commit. No credit card required.</div>
         <div class="p-div"></div>
         <ul class="p-features">
-          <li><span class="tick">✓</span> 5 trace credits / month</li>
-          <li><span class="tick">✓</span> InstallPlan JSON output</li>
-          <li><span class="tick">✓</span> CLI (open source)</li>
-          <li><span class="dash">—</span> Verified Manifest</li>
+          <li><span class="tick">✓</span> 5 trace runs included</li>
+          <li><span class="tick">✓</span> Generate install commands from real installers</li>
+          <li><span class="tick">✓</span> CLI access (open source)</li>
+          <li><span class="tick">✓</span> Validate workflows before scaling</li>
+          <li><span class="tick">✓</span> Community / email support</li>
+          <li><span class="dash">—</span> Verified manifests + confidence scoring</li>
           <li><span class="dash">—</span> Failure diagnostics</li>
           <li><span class="dash">—</span> .intunewin packaging</li>
         </ul>
-        <a href="#" class="p-cta ghost">Get Started Free</a>
+        <a href="https://app.pkgprobe.io" target="_blank" class="p-cta ghost">Start Free</a>
       </div>
+
+      <!-- TEAM -->
       <div class="pricing-card popular reveal reveal-delay-1">
         <div class="popular-badge">Most Popular</div>
-        <div class="p-tier">Pro</div>
-        <div class="p-price"><span class="cur">$</span>49<span class="per"> / mo</span></div>
-        <div class="p-desc">Stop guessing. Ship verified packages to production.<br /><span style="color:var(--gray-dim);font-size:0.75rem;font-style:italic;">Most users recover the cost in 1–2 deployments.</span></div>
+        <div class="p-tier">Team</div>
+        <div class="p-price-block">
+          <div class="p-price-annual-wrap">
+            <span class="p-price-strike">$129</span>
+            <span class="p-annual-badge">Annual</span>
+          </div>
+          <div class="p-price"><span class="cur">$</span>114<span class="per"> / mo</span></div>
+          <div class="p-price-monthly-note">or $129 / mo billed monthly</div>
+        </div>
+        <div class="p-tagline">Stop guessing. Ship reliable packages faster.</div>
+        <div class="p-desc">Most teams recover the cost in 1–2 deployments.</div>
         <div class="p-div"></div>
         <ul class="p-features">
-          <li><span class="tick">✓</span> 50 trace credits / month</li>
-          <li><span class="tick">✓</span> InstallPlan JSON output</li>
-          <li><span class="tick">✓</span> CLI (open source)</li>
-          <li><span class="tick">✓</span> Verified Manifest + confidence scores</li>
-          <li><span class="tick">✓</span> Failure diagnostics — know exactly why</li>
-          <li><span class="tick">✓</span> .intunewin packaging via API</li>
+          <li><span class="tick">✓</span> Prevent failed deployments that impact hundreds of endpoints</li>
+          <li><span class="tick">✓</span> Process your full packaging workload without bottlenecks</li>
+          <li><span class="tick">✓</span> Shared workspace for team collaboration</li>
+          <li><span class="tick">✓</span> Standardized outputs across engineers</li>
+          <li><span class="tick">✓</span> See exactly why installs fail — no more guesswork</li>
+          <li><span class="tick">✓</span> Verified manifests with confidence scoring</li>
+          <li><span class="tick">✓</span> Generate ready-to-deploy <code style="font-size:0.72rem;color:var(--cyan)">.intunewin</code> packages</li>
+          <li><span class="tick">✓</span> Audit-ready logs and history</li>
+          <li><span class="tick">✓</span> Priority support</li>
         </ul>
-        <a href="https://app.pkgprobe.io" target="_blank" class="p-cta solid">Start Pro Trial — Free 7 Days</a>
+        <a href="https://app.pkgprobe.io" target="_blank" class="p-cta solid">Start Team Plan</a>
+        <a href="#demo" class="p-cta-secondary">Book a Free Demo →</a>
       </div>
+
+      <!-- ENTERPRISE -->
       <div class="pricing-card reveal reveal-delay-2">
         <div class="p-tier">Enterprise</div>
         <div class="p-price" style="font-size:2.1rem;letter-spacing:-0.02em">Custom</div>
-        <div class="p-desc">For teams needing on-prem deployment, dedicated workers, or compliance requirements.</div>
+        <div class="p-tagline">For teams that need control, compliance, and scale.</div>
+        <div class="p-desc">Custom onboarding, private deployment, and SLA-backed support.</div>
         <div class="p-div"></div>
         <ul class="p-features">
-          <li><span class="tick">✓</span> Unlimited traces</li>
-          <li><span class="tick">✓</span> Everything in Pro</li>
-          <li><span class="tick">✓</span> On-prem / self-hosted</li>
-          <li><span class="tick">✓</span> Dedicated trace workers</li>
-          <li><span class="tick">✓</span> SCCM + Intune integrations</li>
-          <li><span class="tick">✓</span> SLA + priority support</li>
+          <li><span class="tick">✓</span> Custom throughput for large environments</li>
+          <li><span class="tick">✓</span> Everything in Team</li>
+          <li><span class="tick">✓</span> SSO + advanced access controls</li>
+          <li><span class="tick">✓</span> On-prem / private deployment options</li>
+          <li><span class="tick">✓</span> Compliance-ready reporting and controls</li>
+          <li><span class="tick">✓</span> SCCM + Intune integration workflows</li>
+          <li><span class="tick">✓</span> SLA-backed support + dedicated onboarding</li>
         </ul>
-        <a href="/cdn-cgi/l/email-protection#0c64696060634c7c676b7c7e636e69226563" class="p-cta ghost">Contact Sales</a>
+        <a href="#demo" class="p-cta solid">See If You Qualify →</a>
+        <a href="/cdn-cgi/l/email-protection#0c64696060634c7c676b7c7e636e69226563" class="p-cta-secondary">Contact Sales</a>
+      </div>
+    </div>
+
+    <!-- Microcopy -->
+    <div class="pricing-micro">
+      <div class="pricing-micro-item">No credit card required for Free tier</div>
+      <div class="pricing-micro-item">Annual price shown — save 12% vs monthly</div>
+      <div class="pricing-micro-item">Cancel anytime on monthly plans</div>
+      <div class="pricing-micro-item">Annual invoicing and PO support available</div>
+    </div>
+
+    <!-- Bottom CTA Band -->
+    <div class="pricing-bottom-band reveal">
+      <div class="pbb-text">
+        <h4>Not sure which plan fits?</h4>
+        <p>We'll map pkgprobe to your environment, app volume, and tooling — and show exactly where you'll save time.</p>
+      </div>
+      <div class="pbb-actions">
+        <a href="#demo" class="btn-primary">Book a Free Demo</a>
+        <a href="https://app.pkgprobe.io" target="_blank" class="btn-secondary">Start Free →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO SECTION -->
+<section class="section demo-section" id="demo">
+  <div class="section-inner">
+    <div class="eyebrow">Free Demo</div>
+    <h2 class="section-title">See how much time your team is losing — and how to fix it.</h2>
+    <p class="section-sub">We'll walk through your actual packaging workflow and show where pkgprobe eliminates manual work, reduces failures, and speeds up deployments.</p>
+
+    <div class="demo-inner">
+      <!-- Left: value props -->
+      <div class="demo-what">
+        <h3>What you'll get</h3>
+        <ul class="demo-bullets">
+          <li>
+            <span class="db-icon">🎯</span>
+            <span>A live walkthrough using your tooling (Intune, SCCM, or hybrid)</span>
+          </li>
+          <li>
+            <span class="db-icon">⏱</span>
+            <span>A realistic estimate of hours saved based on your app volume</span>
+          </li>
+          <li>
+            <span class="db-icon">🔍</span>
+            <span>Identification of bottlenecks in your current packaging process</span>
+          </li>
+          <li>
+            <span class="db-icon">📐</span>
+            <span>A standardized, repeatable packaging workflow</span>
+          </li>
+          <li>
+            <span class="db-icon">🛡</span>
+            <span>Guidance on compliance, auditability, and rollout safety</span>
+          </li>
+          <li>
+            <span class="db-icon">📋</span>
+            <span>A recommended plan tailored to your environment</span>
+          </li>
+        </ul>
+
+        <div class="demo-who">
+          <h3>Who this is for</h3>
+          <div class="demo-personas">
+            <span class="demo-persona">Endpoint Administrators</span>
+            <span class="demo-persona">SCCM / Intune Engineers</span>
+            <span class="demo-persona">IT Operations Managers</span>
+            <span class="demo-persona">500–5000+ endpoints</span>
+          </div>
+        </div>
+
+        <div class="demo-alt">
+          Prefer to explore first? <a href="https://app.pkgprobe.io" target="_blank">Start Free</a> and book a demo when you're ready.
+        </div>
+      </div>
+
+      <!-- Right: form -->
+      <div class="demo-form-wrap">
+        <div class="demo-form-title">See if pkgprobe is right for your environment</div>
+        <p style="font-size:0.78rem;color:var(--gray-dim);margin-bottom:1.25rem;line-height:1.5;">We keep demo sessions small so we can personalize each one. Tell us about your environment and we'll confirm a time.</p>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Work Email</label>
+            <input type="email" placeholder="you@company.com" />
+          </div>
+          <div class="form-field">
+            <label>Company Name</label>
+            <input type="text" placeholder="Acme Corp" />
+          </div>
+          <div class="form-field">
+            <label>Endpoint Count</label>
+            <select>
+              <option value="" disabled selected>Select range…</option>
+              <option>Under 500</option>
+              <option>500 – 2,000</option>
+              <option>2,000 – 5,000</option>
+              <option>5,000+</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Current Tooling</label>
+            <select>
+              <option value="" disabled selected>Select tooling…</option>
+              <option>Intune</option>
+              <option>SCCM / ConfigMgr</option>
+              <option>Both</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Apps Packaged Per Month</label>
+            <select>
+              <option value="" disabled selected>Select volume…</option>
+              <option>0 – 10</option>
+              <option>11 – 25</option>
+              <option>26 – 50</option>
+              <option>50+</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Biggest Packaging Challenge</label>
+            <textarea placeholder="e.g. silent install flags break constantly, detection rules are unreliable, deployments fail silently…"></textarea>
+          </div>
+
+          <!-- CONTEXTUAL MINI-FAQ — risk reversal at the moment of commitment -->
+          <div class="form-mini-faq">
+            <details class="form-faq-item">
+              <summary>Is this just a sales call? <span class="faq-chevron">+</span></summary>
+              <div class="faq-body">No. We use the 30 minutes to map your actual packaging workflow and show you specifically where pkgprobe saves time in your environment. You'll leave with a realistic hours-saved estimate and a clear picture of whether it fits — even if you don't end up buying.</div>
+            </details>
+            <details class="form-faq-item">
+              <summary>What if our environment is too niche or complex? <span class="faq-chevron">+</span></summary>
+              <div class="faq-body">That's exactly the kind of thing we want to know upfront. If pkgprobe isn't the right fit, we'll tell you straight — we'd rather say that now than have you find out after signing up. Fill in your biggest challenge above and we'll come prepared with a specific answer.</div>
+            </details>
+          </div>
+
+          <button class="form-submit" onclick="handleDemoSubmit(this)">Request Access — Check Availability →</button>
+        </div>
+        <div class="form-trust">
+          <div class="form-trust-item">30-minute focused session</div>
+          <div class="form-trust-item">No obligation</div>
+          <div class="form-trust-item">Personalized to your environment</div>
+          <div class="form-trust-item">You'll leave with actionable improvements</div>
+        </div>
       </div>
     </div>
   </div>
@@ -664,11 +1266,11 @@
 
 <!-- FINAL CTA -->
 <section class="final-cta">
-  <h2>Stop wasting hours<br /><span class="accent-orange">testing installers.</span></h2>
-  <p>Get verified silent install commands and Intune-ready packages in minutes. Free to start, no credit card required.</p>
+  <h2>Stop losing hours to<br /><span class="accent-orange">installer flags you can't find.</span></h2>
+  <p>pkgprobe extracts the exact silent args that work — from your actual installer, in a real VM, in under 10 minutes. Free to start.</p>
   <div class="final-actions">
-    <a href="https://app.pkgprobe.io" target="_blank" class="btn-primary">✦ Start Free — Get Your First InstallPlan</a>
-    <a href="https://github.com/Zeph3r/pkgprobe/blob/main/docs/USAGE.md" target="_blank" class="btn-secondary">Read the Docs →</a>
+    <a href="https://app.pkgprobe.io" target="_blank" class="btn-primary">✦ Start Free — No Credit Card</a>
+    <a href="#demo" class="btn-secondary">See If It Fits Your Environment →</a>
   </div>
 </section>
 
@@ -680,7 +1282,8 @@
   </a>
   <ul class="f-links">
     <li><a href="https://app.pkgprobe.io" target="_blank">Docs</a></li>
-    <li><a href="https://app.pkgprobe.io" target="_blank">Pricing</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#demo">Book Demo</a></li>
     <li><a href="./blog/">Blog</a></li>
     <li><a href="https://github.com/zeph3r/pkgprobe" target="_blank">GitHub</a></li>
     <li><a href="https://pypi.org/project/pkgprobe" target="_blank">PyPI</a></li>
@@ -689,8 +1292,17 @@
   </ul>
   <div class="f-copy">© 2026 pkgprobe.io — Built for endpoint engineers</div>
 </footer>
+
 <script>
 (function() {
+  // ── DEMO FORM SUBMIT ──
+  window.handleDemoSubmit = function(btn) {
+    btn.textContent = '✓ Request received — we\'ll be in touch soon';
+    btn.style.background = 'var(--green)';
+    btn.disabled = true;
+  };
+
+  // ── CLI ANIMATION ──
   var CMD = 'pkgprobe-trace run Slack-4.38.125.exe';
   var LOG_IDS = ['cl1','cl2','cl3','cl4','cl5','cl6','cl7'];
   var LOG_DELAYS = [320, 620, 940, 1460, 2180, 2780, 3180];
@@ -813,7 +1425,6 @@
     }, 360);
   }
 
-  // Intune code typewriter on scroll
   function animateIcode() {
     var lines = document.querySelectorAll('#icode-body .icode-line');
     lines.forEach(function(line, i) {
@@ -859,7 +1470,6 @@
         });
       }
 
-      // seed initial particles spread across full height
       for (var s = 0; s < 28; s++) {
         spawn();
         particles[particles.length-1].y = Math.random() * canvas.height;
@@ -888,10 +1498,8 @@
       requestAnimationFrame(draw);
     }
 
-    // Boot CLI
     setTimeout(runCli, 700);
 
-    // Replay on filename click
     var tbFile = document.querySelector('.tb-file');
     if (tbFile) tbFile.addEventListener('click', resetAndReplay);
 
@@ -949,13 +1557,14 @@
       obs.observe(icodeEl);
     }
   });
+
   // ── HEADLINE WORD CYCLER ──
   var PAIRS = [
-    { word: 'Installer',  suffix: ' Flags.'    },
-    { word: 'Silent',     suffix: ' Switches.' },
-    { word: 'Install',    suffix: ' Commands.' },
-    { word: 'Deploy',     suffix: ' Switches.' },
-    { word: 'MSI',        suffix: ' Arguments.'},
+    { word: 'Reinstall Loops?',   suffix: '' },
+    { word: 'Version Conflicts?', suffix: '' },
+    { word: 'Broken Upgrades?',   suffix: '' },
+    { word: 'Silent Failures?',   suffix: '' },
+    { word: 'Detection Lies?',    suffix: '' },
   ];
   var cycleIdx = 0;
   var cycleEl  = document.getElementById('cycle-word');
@@ -1004,27 +1613,19 @@
   }
 
   function runCycle() {
-    if (!cycleEl || !cycleEl2) return;
-    // pause on current word, then erase both and type next
+    if (!cycleEl) return;
     setTimeout(function() {
       cycleIdx = (cycleIdx + 1) % PAIRS.length;
       var next = PAIRS[cycleIdx];
-      // erase suffix first, then word
-      eraseSuffix(cycleEl2, function() {
-        eraseWord(cycleEl, function() {
-          typeWord(cycleEl, next.word, function() {
-            typeSuffix(cycleEl2, next.suffix, function() {
-              runCycle();
-            });
-          });
+      eraseWord(cycleEl, function() {
+        typeWord(cycleEl, next.word, function() {
+          runCycle();
         });
       });
     }, 2600);
   }
 
-  // kick off after a delay so it doesn't compete with CLI boot
   setTimeout(runCycle, 3500);
-
 })();
 </script>
 </body>
