@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Installer Matrix: Testing the Wild West of Windows Packaging Before It Hits Cloud — pkgprobe.io</title>
+  <title>The Installer Matrix: Testing the Wild West of Windows Packaging Before It Leaves the Lab — pkgprobe.io</title>
   <link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
   <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
   <meta name="theme-color" content="#080a0e">
-  <meta property="og:title" content="The Installer Matrix: Testing the Wild West of Windows Packaging Before It Hits Cloud — pkgprobe.io">
-  <meta property="og:description" content="We're building a tool that automates Windows application packaging for Intune. Before scaling it to cloud, we forced ourselves through a disciplined local matrix — 30 installer types, 9 buckets, deliberately adversarial samples. Here's what we built, what we broke, and the bugs we caught.">
+  <meta property="og:title" content="The Installer Matrix: Testing the Wild West of Windows Packaging Before It Leaves the Lab — pkgprobe.io">
+  <meta property="og:description" content="I'm building a tool that automates Windows application packaging for Intune. Before I felt confident in the type taxonomy, I forced myself through a disciplined local matrix — 30 installer types, 9 buckets, deliberately adversarial samples. Here's what I built, what I broke, and the bugs I caught.">
   <meta property="og:image" content="https://pkgprobe.io/img/pkgprobe_logo_notext.png">
   <meta property="og:url" content="https://pkgprobe.io/blog/installer-matrix">
   <meta property="og:type" content="article">
@@ -482,9 +482,9 @@
   <div class="nav-right">
     <a href="https://github.com/Zeph3r/pkgprobe" target="_blank" class="nav-gh">GitHub</a>
     <div class="nav-divider"></div>
-    <a href="https://app.pkgprobe.io" class="nav-app-btn">
+    <a href="https://github.com/Zeph3r/pkgprobe" target="_blank" rel="noopener" class="nav-app-btn">
       <span class="live-dot"></span>
-      Launch App
+      GitHub
     </a>
   </div>
 </nav>
@@ -502,12 +502,12 @@
         <span class="post-tag tag-orange">Tooling</span>
         <span class="post-tag tag-blue">Deployment</span>
         <span class="post-tag tag-green">Open Source</span>
-        <span class="article-date">May 5, 2025</span>
+        <span class="article-date">May 21, 2026</span>
         <span class="article-read-time">⏱ 9 min read</span>
       </div>
       <div class="article-author">By Tijan McClain</div>
-      <h1 class="article-title">The Installer Matrix: Testing the Wild West of Windows Packaging Before It Hits Cloud</h1>
-      <p class="article-lead">We're building a tool that automates Windows application packaging for Intune. Before scaling it to cloud, we forced ourselves through a disciplined local matrix — 30 installer types, 9 buckets, deliberately adversarial samples. Here's what we built, what we broke, and the bugs we caught before they became production failures.</p>
+      <h1 class="article-title">The Installer Matrix: Testing the Wild West of Windows Packaging Before It Leaves the Lab</h1>
+      <p class="article-lead">I'm building a tool that automates Windows application packaging for Intune. Before I felt confident in the type taxonomy, I forced myself through a disciplined local matrix — 30 installer types, 9 buckets, deliberately adversarial samples. Here's what I built, what I broke, and the bugs I caught before they became production failures.</p>
     </header>
 
     <!-- Hero terminal: a run in progress -->
@@ -603,17 +603,17 @@
 
       <p>The output is a self-contained, ready-to-deploy package. No research. No trial-and-error. No rewrapping. The hard part — figuring out how the installer actually behaves at runtime — is done automatically against a real VM.</p>
 
-      <h2 id="s2"><span class="h2-num">02</span> Why We Built the Installer Matrix Before Touching Cloud</h2>
+      <h2 id="s2"><span class="h2-num">02</span> Why I tested locally before considering cloud</h2>
 
-      <p>We had a working local trace pipeline and a tempting question: why not just scale it to cloud now? More VMs, more parallelism, automated orchestration. The answer is that cloud multiplies operational surface area — credentials, quotas, VM provisioning, egress, retry semantics — without proving that the core logic behaves correctly across diverse real-world payloads. A bug in silent-switch selection that slips through local testing becomes a bug that fires across hundreds of concurrent cloud jobs.</p>
+      <p>I had a working local trace pipeline and a tempting question: why not just sketch a distributed version now? More VMs, more parallelism, automated orchestration. The answer is that distributed execution multiplies operational surface area — credentials, quotas, VM provisioning, egress, retry semantics — without proving that the core logic behaves correctly across diverse real-world payloads. A bug in silent-switch selection that slips through local testing becomes a bug that fires across hundreds of concurrent jobs.</p>
 
-      <p>The right move was a disciplined local matrix first. Run the full range of installer types, subtypes, and adversarial edge cases against a single trace VM. Capture artifacts. Understand failure modes. <strong>Then</strong> move to cloud, carrying those findings as a test baseline.</p>
+      <p>The right move was a disciplined local matrix first. Run the full range of installer types, subtypes, and adversarial edge cases against a single trace VM. Capture artifacts. Understand failure modes. <strong>Then</strong> consider distributed execution, carrying those findings as a test baseline.</p>
 
       <div class="callout callout-info">
         <span class="callout-icon">💡</span>
         <div class="callout-body">
-          <strong>The gate we set for ourselves</strong>
-          <p>Move to cloud only once: (a) trace completes or fails with actionable artifacts across all installer types, (b) we have timeout defaults we're willing to defend in production, and (c) we understand wrapper verification cost per job under real load.</p>
+          <strong>The gate I set for myself</strong>
+          <p>Consider distributed execution only once: (a) trace completes or fails with actionable artifacts across all installer types, (b) I have timeout defaults I'm willing to defend in production, and (c) I understand wrapper verification cost per job under real load.</p>
         </div>
       </div>
 
@@ -711,7 +711,7 @@
 
       <p>Most installer testing stops at "did it run silently." That's not enough. The bugs that matter in production aren't the ones where an installer fails loudly — they're the ones where it succeeds in a way that's subtly wrong. Detection rule points to the wrong registry key. Exit code 1638 gets treated as a failure instead of "already installed." Silent install completes but spawns a background process that holds the installer service open.</p>
 
-      <p>We built eight specific adversarial cases into the matrix, each targeting a known failure mode:</p>
+      <p>I built eight specific adversarial cases into the matrix, each targeting a known failure mode:</p>
 
       <div class="finding-grid">
         <div class="finding-card warn">
@@ -764,7 +764,7 @@
         </div>
       </div>
 
-      <h2 id="s5"><span class="h2-num">05</span> A Bug We Caught Before It Shipped</h2>
+      <h2 id="s5"><span class="h2-num">05</span> A Bug I Caught Before It Shipped</h2>
 
       <p>The 7-Zip GUID mismatch wasn't a fluke — it exposed a real gap in how the pipeline handles MSI detection. The static analysis reads <code>ProductCode</code> from the MSI Property table before any install happens. The trace pipeline derives its detection candidate from what actually gets written to the Windows Installer uninstall registry hive after install completes. For most well-behaved MSIs these match. For 7-Zip, they didn't.</p>
 
@@ -773,13 +773,13 @@
       <div class="callout callout-danger">
         <span class="callout-icon">🔴</span>
         <div class="callout-body">
-          <strong>What we shipped as a result</strong>
-          <p>A new guardrail in both the OSS trace worker and the cloud API: when <code>plan.metadata.ProductCode</code> from analysis disagrees with the GUID extracted from the trace registry candidate, a structured warning is appended to <code>verification_errors</code> in the manifest — non-fatal, but visible. This runs on every MSI job now, not just the ones we happened to test.</p>
+          <strong>What I shipped as a result</strong>
+          <p>A new guardrail in both the OSS trace worker and experimental scaffolding I had drafted: when <code>plan.metadata.ProductCode</code> from analysis disagrees with the GUID extracted from the trace registry candidate, a structured warning is appended to <code>verification_errors</code> in the manifest — non-fatal, but visible. This runs on every MSI job now, not just the ones I happened to test.</p>
         </div>
       </div>
 
       <div class="pipeline">
-        <div class="pipeline-label">// productcode mismatch guardrail — what we added</div>
+        <div class="pipeline-label">// productcode mismatch guardrail — what I added</div>
         <div class="pipeline-steps">
           <div class="pipeline-step">
             <div class="pipeline-connector"><div class="pipeline-dot"></div><div class="pipeline-line"></div></div>
@@ -843,38 +843,38 @@
         </div>
       </div>
 
-      <h2 id="s7"><span class="h2-num">07</span> Where We Are — Honest Progress Report</h2>
+      <h2 id="s7"><span class="h2-num">07</span> Where I Am — Honest Progress Report</h2>
 
       <p>The matrix is still running. A few things worth being straight about:</p>
 
-      <p><strong>What's working well.</strong> MSI and NSIS detection and switch selection are solid across everything we've tested. The PSADT wrapper path handles both families cleanly. Detection candidate generation — registry key, ProductCode, file_exists — is producing usable results with sensible confidence scoring. The end-to-end path from installer file to downloadable <code>.intunewin</code> is working.</p>
+      <p><strong>What's working well.</strong> MSI and NSIS detection and switch selection are solid across everything I've tested. The PSADT wrapper path handles both families cleanly. Detection candidate generation — registry key, ProductCode, file_exists — is producing usable results with sensible confidence scoring. The end-to-end path from installer file to downloadable <code>.intunewin</code> is working.</p>
 
       <p><strong>Where there's still room to improve.</strong> The generic/unknown EXE bucket is the weakest area — it's the largest population in real-world deployments and the hardest to test systematically. The Firefox <code>-ms</code> case is a good example of the failure mode that matters there: a completely non-standard flag that no generic fallback list will ever enumerate. The right answer for that bucket is probably a combination of better heuristics and clearer surfacing of low-confidence cases to the user rather than silent guessing.</p>
 
-      <p><strong>What we're not claiming.</strong> The matrix validates the type taxonomy and switch policy across representative samples. It doesn't tell us the failure rate against the full population of real-world enterprise installers — for that we need production traffic, which comes after the matrix, not instead of it. If 80% of enterprise software happens to fall into the generic EXE bucket (it probably doesn't, but if it did), the matrix wouldn't catch that.</p>
+      <p><strong>What I'm not claiming.</strong> The matrix validates the type taxonomy and switch policy across representative samples. It doesn't tell me the failure rate against the full population of real-world enterprise installers — for that I need production traffic, which comes after the matrix, not instead of it. If 80% of enterprise software happens to fall into the generic EXE bucket (it probably doesn't, but if it did), the matrix wouldn't catch that.</p>
 
       <div class="callout callout-tip">
         <span class="callout-icon">🚀</span>
         <div class="callout-body">
           <strong>The gate is: actionable artifacts, not green lights</strong>
-          <p>The matrix isn't done when every installer passes. It's done when every failure — timeout, wrong flag, bad detection — produces a bundle that's diagnosable without re-running the job. That's the thing that makes cloud scale survivable.</p>
+          <p>The matrix isn't done when every installer passes. It's done when every failure — timeout, wrong flag, bad detection — produces a bundle that's diagnosable without re-running the job. That's the thing that would make any larger execution model survivable.</p>
         </div>
       </div>
 
       <div class="article-conclusion">
         <div class="conclusion-label">// takeaway</div>
-        <blockquote>Cloud doesn't fix a broken type matrix. It just makes the failures happen faster and further from your debugger.</blockquote>
-        <p>The matrix didn't find every bug. It won't. What it did was force us to think about failure modes before we were debugging them at 2am across twelve cloud VMs with no local reproduction path. That's the protection we wanted in place before scaling.</p>
-        <p>We're running the rest of the matrix now — Burn bootstrappers, Squirrel apps, the InstallShield fringe cases, Firefox. If you're doing similar work in Windows packaging and want to compare notes, or if you want early access to pkgprobe, the links below are the right place to start.</p>
+        <blockquote>A larger runner pool doesn't fix a broken type matrix. It just makes the failures happen faster and further from your debugger.</blockquote>
+        <p>The matrix didn't find every bug. It won't. What it did was force me to think about failure modes before I was debugging them at 2am across twelve remote VMs with no local reproduction path. That's the protection I wanted in place before expanding beyond local testing.</p>
+        <p>I'm running the rest of the matrix now — Burn bootstrappers, Squirrel apps, the InstallShield fringe cases, Firefox. If you're doing similar work in Windows packaging and want to compare notes, or if you want the GitHub repo, the links below are the right place to start.</p>
       </div>
 
       <div class="article-cta">
         <div class="article-cta-text">
-          <h3>Try pkgprobe on your own installers</h3>
+          <h3>Run pkgprobe on your own installers</h3>
           <p>Upload any Windows installer and get a fully traced, Intune-ready <code>.intunewin</code> package with verified detection rules — in minutes, not hours.</p>
         </div>
-        <a href="https://app.pkgprobe.io" class="btn-primary">
-          Launch App →
+        <a href="https://github.com/Zeph3r/pkgprobe#readme" target="_blank" rel="noopener" class="btn-primary">
+          GitHub →
         </a>
       </div>
 
@@ -887,10 +887,10 @@
       <div class="sidebar-label">// contents</div>
       <ul class="toc-list">
         <li><a href="#s1"><span class="toc-num">01</span> What packaging engineers do today</a></li>
-        <li><a href="#s2"><span class="toc-num">02</span> Why local before cloud</a></li>
+        <li><a href="#s2"><span class="toc-num">02</span> Why local testing first</a></li>
         <li><a href="#s3"><span class="toc-num">03</span> How the codebase partitions types</a></li>
         <li><a href="#s4"><span class="toc-num">04</span> The adversarial cases</a></li>
-        <li><a href="#s5"><span class="toc-num">05</span> A bug we caught before it shipped</a></li>
+        <li><a href="#s5"><span class="toc-num">05</span> A bug I caught before it shipped</a></li>
         <li><a href="#s6"><span class="toc-num">06</span> Matrix in numbers</a></li>
         <li><a href="#s7"><span class="toc-num">07</span> Honest progress report</a></li>
       </ul>
@@ -900,17 +900,17 @@
       <a href="/blog/silent-install-switches" class="related-post">
         <span class="related-post-tag">Deployment</span>
         <span class="related-post-title">Silent Install Switches: Stop Guessing, Start Probing</span>
-        <span class="related-post-date">Jan 15, 2025</span>
+        <span class="related-post-date">Apr 21, 2026</span>
       </a>
       <a href="/blog/msi-metadata-deep-dive" class="related-post">
         <span class="related-post-tag">Analysis</span>
         <span class="related-post-title">What MSI Metadata Actually Tells You About an Installer's Risk</span>
-        <span class="related-post-date">Jan 28, 2025</span>
+        <span class="related-post-date">May 7, 2026</span>
       </a>
       <a href="/blog/registry-impact-analysis" class="related-post">
         <span class="related-post-tag">Security</span>
         <span class="related-post-title">Registry Impact Analysis: What Your Installer Actually Touches</span>
-        <span class="related-post-date">Feb 10, 2025</span>
+        <span class="related-post-date">May 14, 2026</span>
       </a>
     </div>
     <div class="sidebar-card">
@@ -932,9 +932,9 @@
   <ul class="footer-links">
     <li><a href="/blog">Blog</a></li>
     <li><a href="https://github.com/Zeph3r/pkgprobe" target="_blank">GitHub</a></li>
-    <li><a href="https://app.pkgprobe.io">Launch App</a></li>
+    <li><a href="https://github.com/Zeph3r/pkgprobe#readme">GitHub</a></li>
   </ul>
-  <span class="footer-copy">© 2025 pkgprobe.io</span>
+  <span class="footer-copy">© 2026 pkgprobe.io</span>
 </footer>
 
 </body>
