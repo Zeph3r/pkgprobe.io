@@ -51,77 +51,55 @@
       z-index: 0;
     }
 
+    /* OPEN SOURCE STRIP */
+    .os-strip { background: linear-gradient(90deg, rgba(34,197,94,0.07), rgba(34,197,94,0.03), rgba(34,197,94,0.07)); border-bottom: 1px solid rgba(34,197,94,0.14); padding: 0.6rem 2rem; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--white); letter-spacing: 0.04em; display: flex; align-items: center; justify-content: center; gap: 0.75rem; position: relative; z-index: 1; }
+    .os-strip .os-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 1.8s ease infinite; flex-shrink: 0; }
+    .os-strip strong { color: var(--green); text-shadow: 0 0 6px rgba(34,197,94,0.4); }
+    .os-strip a { color: var(--white); text-decoration: underline; text-underline-offset: 3px; opacity: 0.8; transition: opacity 0.2s; margin-left: 0.5rem; }
+    .os-strip a:hover { opacity: 1; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.55; transform: scale(0.88); } }
+
     /* ── NAV ── */
-    nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 2.5rem;
-      height: 64px;
-      background: rgba(8,10,14,0.85);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
-    }
-    .nav-logo {
-      display: flex; align-items: center; gap: 0.6rem;
-      text-decoration: none;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 800; font-size: 1.15rem;
-      letter-spacing: -0.01em; flex-shrink: 0;
-    }
-    .nav-logo img { height: 52px; width: auto; object-fit: contain; }
-    .nav-logo .pkg   { color: var(--white); }
-    .nav-logo .probe { color: var(--orange); }
-    .nav-logo .io    { color: var(--blue-bright); font-size: 0.9rem; }
-    .nav-wordmark    { display: inline-flex; align-items: baseline; }
-    .nav-center {
-      display: flex; align-items: center; gap: 0;
-      list-style: none; position: absolute;
-      left: 50%; transform: translateX(-50%);
-    }
-    .nav-center li a {
-      color: var(--gray); text-decoration: none;
-      font-size: 0.8rem; font-weight: 600;
-      letter-spacing: 0.05em; text-transform: uppercase;
-      transition: color 0.2s; padding: 0.35rem 0.9rem;
-      border-radius: 6px; display: block;
-    }
-    .nav-center li a:hover,
-    .nav-center li a.active { color: var(--white); }
+    .icon { width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .icon-sm { width: 14px; height: 14px; }
+    nav { position: sticky; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 2.5rem; height: 64px; background: rgba(8,10,14,0.88); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); gap: 1rem; }
+    .nav-logo { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.1rem; letter-spacing: -0.01em; flex-shrink: 0; }
+    .nav-logo img { height: 44px; width: auto; object-fit: contain; }
+    .nav-wordmark { display: inline-flex; align-items: baseline; }
+    .nav-logo .pkg { color: var(--white); }
+    .nav-logo .probe { color: var(--orange); text-shadow: 0 0 12px rgba(249,115,22,0.4); }
+    .nav-logo .io { color: var(--blue-bright); font-size: 0.85rem; }
+    .nav-center { display: flex; align-items: center; gap: 0; list-style: none; flex: 1; justify-content: center; min-width: 0; }
+    .nav-center > li > a { color: var(--gray); text-decoration: none; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; transition: color 0.2s; padding: 0.5rem 0.75rem; border-radius: 6px; display: block; white-space: nowrap; }
+    .nav-center > li > a:hover { color: var(--white); }
+    .nav-dropdown { position: relative; }
+    .nav-trigger { background: transparent; border: none; cursor: pointer; color: var(--gray); font-family: 'Poppins', sans-serif; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.5rem 0.75rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.35rem; transition: color 0.2s, background 0.2s; white-space: nowrap; }
+    .nav-trigger:hover, .nav-trigger[aria-expanded="true"] { color: var(--white); background: rgba(255,255,255,0.03); }
+    .nav-chev { width: 8px; height: 8px; transition: transform 0.2s; opacity: 0.7; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .nav-trigger[aria-expanded="true"] .nav-chev { transform: rotate(180deg); color: var(--orange); opacity: 1; }
+    .nav-menu { position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%) translateY(-6px); min-width: 280px; background: rgba(15,19,25,0.96); backdrop-filter: blur(20px); border: 1px solid var(--border-bright); border-radius: 10px; padding: 0.4rem; box-shadow: 0 24px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.02); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.2s, transform 0.2s, visibility 0.2s; display: flex; flex-direction: column; gap: 0.15rem; }
+    .nav-menu::before { content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%) rotate(45deg); width: 10px; height: 10px; background: rgba(15,19,25,0.96); border-top: 1px solid var(--border-bright); border-left: 1px solid var(--border-bright); }
+    .nav-dropdown::after { content: ''; position: absolute; top: 100%; left: 0; right: 0; height: 14px; pointer-events: none; }
+    .nav-dropdown:hover::after, .nav-dropdown:focus-within::after { pointer-events: auto; }
+    .nav-dropdown:hover .nav-menu, .nav-dropdown:focus-within .nav-menu, .nav-trigger[aria-expanded="true"] + .nav-menu { opacity: 1; visibility: visible; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+    .nav-menu a { display: flex; align-items: center; gap: 0.7rem; padding: 0.65rem 0.75rem; border-radius: 7px; color: var(--white); text-decoration: none; transition: background 0.15s; }
+    .nav-menu a:hover { background: rgba(249,115,22,0.06); }
+    .nm-icon { width: 32px; height: 32px; flex-shrink: 0; background: var(--dark-3); border: 1px solid var(--border); border-radius: 7px; display: flex; align-items: center; justify-content: center; color: var(--gray); transition: border-color 0.2s, background 0.2s, color 0.2s; }
+    .nav-menu a:hover .nm-icon { border-color: rgba(249,115,22,0.3); background: var(--orange-dim); color: var(--orange); }
+    .nm-text { display: flex; flex-direction: column; gap: 0.1rem; line-height: 1.2; }
+    .nm-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.82rem; color: var(--white); letter-spacing: -0.005em; }
+    .nm-desc { font-family: 'JetBrains Mono', monospace; font-size: 0.62rem; color: var(--gray-dim); letter-spacing: 0.02em; }
     .nav-right { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
-    .nav-gh {
-      color: var(--gray) !important; text-decoration: none;
-      font-size: 0.78rem; font-weight: 600;
-      letter-spacing: 0.05em; text-transform: uppercase;
-      transition: color 0.2s; padding: 0.35rem 0.75rem; border-radius: 6px;
-    }
-    .nav-gh:hover { color: var(--white) !important; }
-    .nav-divider { width: 1px; height: 22px; background: var(--border); }
-    .nav-app-btn {
-      display: inline-flex; align-items: center; gap: 0.45rem;
-      background: linear-gradient(135deg, rgba(249,115,22,0.15) 0%, rgba(59,130,246,0.15) 100%);
-      border: 1px solid rgba(249,115,22,0.4);
-      color: var(--white) !important; text-decoration: none;
-      font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700;
-      letter-spacing: 0.04em; padding: 0.45rem 1rem; border-radius: 7px;
-      transition: background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
-      white-space: nowrap;
-    }
-    .nav-app-btn:hover {
-      border-color: rgba(249,115,22,0.7); transform: translateY(-1px);
-      box-shadow: 0 4px 16px rgba(249,115,22,0.2), 0 0 0 1px rgba(249,115,22,0.1);
-    }
-    .nav-app-btn .live-dot {
-      width: 6px; height: 6px; border-radius: 50%; background: #22c55e;
-      flex-shrink: 0; animation: pulse-dot 2s ease-in-out infinite;
-    }
-    @keyframes pulse-dot {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
-      50%       { box-shadow: 0 0 0 4px rgba(34,197,94,0); }
-    }
+    .nav-stars { display: inline-flex; align-items: center; gap: 0.4rem; background: var(--dark-3); border: 1px solid var(--border-bright); border-radius: 6px; padding: 0.35rem 0.7rem; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--gray); text-decoration: none; transition: border-color 0.2s, color 0.2s; }
+    .nav-stars:hover { border-color: rgba(249,115,22,0.4); color: var(--white); }
+    .nav-stars .star-icon { color: var(--orange); }
+    .nav-divider { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
+    .nav-app-btn { display: inline-flex; align-items: center; gap: 0.45rem; background: linear-gradient(135deg, rgba(249,115,22,0.15) 0%, rgba(59,130,246,0.15) 100%); border: 1px solid rgba(249,115,22,0.4); color: var(--white) !important; text-decoration: none; font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.04em; padding: 0.45rem 1rem; border-radius: 7px; transition: background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s; white-space: nowrap; }
+    .nav-app-btn:hover { border-color: rgba(249,115,22,0.7); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(249,115,22,0.2); }
+    .nav-app-btn .arrow-icon { width: 10px; height: 10px; opacity: 0.7; transition: transform 0.2s, opacity 0.2s; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .nav-app-btn:hover .arrow-icon { transform: translate(2px,-2px); opacity: 1; }
+    @media (max-width: 1050px) { .nav-stars, .nav-divider { display: none; } }
+    @media (max-width: 900px) { .nav-center { display: none; } nav { padding: 0 1.25rem; } }
 
     /* ── LAYOUT ── */
     .article-wrapper {
@@ -520,7 +498,7 @@
 
     /* ── RESPONSIVE ── */
     @media (max-width: 1080px) { .nav-center { display: none; } }
-    @media (max-width: 720px)  { .nav-gh { display: none; } .nav-divider { display: none; } }
+    @media (max-width: 720px)  { .nav-stars { display: none; } .nav-divider { display: none; } }
     @media (max-width: 900px) {
       .article-wrapper { grid-template-columns: 1fr; gap: 3rem; padding-top: 6rem; }
       .article-sidebar { position: static; }
@@ -544,25 +522,100 @@
 </head>
 <body>
 
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-arrow-ne" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></symbol>
+    <symbol id="i-chev-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20 15.3 15.3 0 010-20z"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/><path d="M6 7h.01M6 17h.01"/></symbol>
+    <symbol id="i-git-pr" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><path d="M6 9v6M15 18H9"/></symbol>
+  </defs>
+</svg>
+
+<div class="os-strip">
+  <span class="os-dot"></span>
+  <span><strong>PUBLIC BY DEFAULT</strong> — Every line of code, every roadmap item, every issue is on GitHub.</span>
+  <a href="https://github.com/zeph3r/pkgprobe" target="_blank" rel="noopener">View on GitHub →</a>
+</div>
+
 <!-- NAV -->
 <nav>
   <a href="/" class="nav-logo">
-    <img src="./img/pkgprobe_logo_notext.png" alt="pkgprobe logo" onerror="this.style.display='none'" />
+    <img src="/img/pkgprobe_logo_notext.png" alt="pkgprobe logo" onerror="this.style.display='none'" />
     <span class="nav-wordmark"><span class="pkg">pkg</span><span class="probe">probe</span><span class="io">.io</span></span>
   </a>
   <ul class="nav-center">
-    <li><a href="/#features">Features</a></li>
-    <li><a href="/#how">How it works</a></li>
-    <li><a href="/#usecases">Use cases</a></li>
-    <li><a href="/#install">Install</a></li>
-    <li><a href="/blog" class="active">Blog</a></li>
+    <li class="nav-dropdown">
+      <button class="nav-trigger" aria-expanded="false" aria-haspopup="true">
+        Product <svg class="nav-chev"><use href="#i-chev-down"/></svg>
+      </button>
+      <div class="nav-menu" role="menu">
+        <a href="/#how" role="menuitem">
+          <span class="nm-icon"><svg class="icon icon-sm"><use href="#i-zap"/></svg></span>
+          <span class="nm-text">
+            <span class="nm-title">How It Works</span>
+            <span class="nm-desc">Trace · Analyze · Verify</span>
+          </span>
+        </a>
+        <a href="/#whatsin" role="menuitem">
+          <span class="nm-icon"><svg class="icon icon-sm"><use href="#i-box"/></svg></span>
+          <span class="nm-text">
+            <span class="nm-title">What's Inside</span>
+            <span class="nm-desc">Source · Roadmap · PyPI</span>
+          </span>
+        </a>
+        <a href="/#failures" role="menuitem">
+          <span class="nm-icon"><svg class="icon icon-sm"><use href="#i-search"/></svg></span>
+          <span class="nm-text">
+            <span class="nm-title">Why It Fails</span>
+            <span class="nm-desc">Failure modes & fixes</span>
+          </span>
+        </a>
+      </div>
+    </li>
+    <li class="nav-dropdown">
+      <button class="nav-trigger" aria-expanded="false" aria-haspopup="true">
+        Open Source <svg class="nav-chev"><use href="#i-chev-down"/></svg>
+      </button>
+      <div class="nav-menu" role="menu">
+        <a href="/#why-os" role="menuitem">
+          <span class="nm-icon"><svg class="icon icon-sm"><use href="#i-globe"/></svg></span>
+          <span class="nm-text">
+            <span class="nm-title">Why Open Source</span>
+            <span class="nm-desc">Inspect, fork, customize</span>
+          </span>
+        </a>
+        <a href="/#self" role="menuitem">
+          <span class="nm-icon"><svg class="icon icon-sm"><use href="#i-server"/></svg></span>
+          <span class="nm-text">
+            <span class="nm-title">Self-Hosted</span>
+            <span class="nm-desc">Run on your infrastructure</span>
+          </span>
+        </a>
+        <a href="/#contribute" role="menuitem">
+          <span class="nm-icon"><svg class="icon icon-sm"><use href="#i-git-pr"/></svg></span>
+          <span class="nm-text">
+            <span class="nm-title">Contribute</span>
+            <span class="nm-desc">PRs, issues, docs</span>
+          </span>
+        </a>
+      </div>
+    </li>
+    <li><a href="/blog/">Blog</a></li>
   </ul>
   <div class="nav-right">
-    <a href="https://github.com/Zeph3r/pkgprobe" target="_blank" class="nav-gh">GitHub</a>
+    <a href="https://github.com/zeph3r/pkgprobe" target="_blank" rel="noopener" class="nav-stars">
+      <svg class="icon icon-sm star-icon"><use href="#i-star"/></svg>
+      <span>Star on GitHub</span>
+    </a>
     <div class="nav-divider"></div>
-    <a href="https://github.com/Zeph3r/pkgprobe" target="_blank" rel="noopener" class="nav-app-btn">
-      <span class="live-dot"></span>
-      GitHub
+    <a href="https://github.com/zeph3r/pkgprobe#readme" target="_blank" rel="noopener" class="nav-app-btn">
+      Read the Docs
+      <svg class="arrow-icon"><use href="#i-arrow-ne"/></svg>
     </a>
   </div>
 </nav>
@@ -990,6 +1043,29 @@
     });
   }, { rootMargin: '-20% 0px -70% 0px' });
   headings.forEach(h => observer.observe(h));
+</script>
+
+<script>
+  // Dropdown nav
+  (function() {
+    var triggers = document.querySelectorAll('.nav-trigger');
+    function closeAll(except) {
+      triggers.forEach(function(t) { if (t !== except) t.setAttribute('aria-expanded', 'false'); });
+    }
+    triggers.forEach(function(trigger) {
+      trigger.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var open = trigger.getAttribute('aria-expanded') === 'true';
+        closeAll(trigger);
+        trigger.setAttribute('aria-expanded', open ? 'false' : 'true');
+      });
+    });
+    document.addEventListener('click', function() { closeAll(null); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeAll(null); });
+    document.querySelectorAll('.nav-menu a').forEach(function(link) {
+      link.addEventListener('click', function() { closeAll(null); });
+    });
+  })();
 </script>
 
 </body>
